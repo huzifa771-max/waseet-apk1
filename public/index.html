@@ -66,8 +66,31 @@ const title=state.role==="admin"?"لوحة حماية وسيط":state.role==="dr
 return `<section class="hero"><div><h1>${title}</h1><p>من الطلب والتفاوض إلى الدفع الضامن والنقل والفحص والتسوية، كل خطوة موثقة داخل وسيط.</p></div></section>${stats()}${deal()}${state.role==="merchant"?`<div class="section"><div class="head"><h2>منتجات مقترحة</h2><button class="btn light" id="marketBtn">كل السوق</button></div><div class="products">${productCards()}</div></div>`:""}`;
 }
 function market(){return `<div class="head"><div><h2>السوق</h2><div class="muted">عروض الموردين المتاحة</div></div></div><div class="products">${productCards()+productCards()}</div>`}
-function requests(){const rs=state.remoteRequests||[];return `<div class="head"><h2>طلبات الشراء</h2></div><div class="card"><table style="width:100%;border-collapse:collapse"><tr><th>المنتج</th><th>الكمية</th><th>الوجهة</th><th>الحالة</th></tr>${rs.map(r=>`<tr><td>${esc(r.product_name)}</td><td>${r.quantity}</td><td>${esc(r.destination||"-")}</td><td><span class="tag">${r.status}</span></td></tr>`).join("")||"<tr><td colspan='4'>لا توجد طلبات.</td></tr>"}</table></div>`}
-function deals(){return deal()+`<div class="section card"><h3>سجل الإجراءات</h3><p class="muted">تم رفع مستند التحميل · تم اعتماد العرض · تم تحديث حالة الصفقة</p></div>`}
+function requests(){
+const all=state.remoteRequests||[];
+const rs=state.role==="merchant"?all.filter(r=>r.merchant_id===state.user?.id):all;
+let html='<div class="head"><div><h2>'+ (state.role==="supplier"?"طلبات التجار":"طلبات الشراء") +'</h2><div class="muted">'+(state.role==="supplier"?"يمكنك تقديم عرض لأي طلب متاح.":"تابع طلباتك والعروض المقدمة عليها.")+'</div></div></div><div id="requestCards">';
+if(!rs.length) html+='<div class="muted">لا توجد طلبات متاحة.</div>';
+for(const r of rs){html+='<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:10px"><div><b>'+esc(r.product_name)+'</b><div class="muted">الكمية: '+esc(r.quantity)+' · الوجهة: '+esc(r.destination||"-")+'</div></div><span class="tag">'+esc(r.status||"open")+'</span></div><div class="muted" style="margin-top:8px">'+esc(r.description||"")+(r.weight?(" · الوزن: "+esc(r.weight)):"")+'</div><div id="offers-'+r.id+'" style="margin-top:10px"><span class="muted">جاري تحميل العروض...</span></div>'+(state.role==="supplier"?'<button class="btn" data-make-offer="'+r.id+'" style="margin-top:10px">تقديم عرض</button>':"")+'</div>';}
+return html+'</div>';
+}async function bindRequests(){
+const rs=state.role==="merchant"?(state.remoteRequests||[]).filter(r=>r.merchant_id===state.user?.id):(state.remoteRequests||[]);
+for(const r of rs){
+const q=await db.from("offers").select("*").eq("request_id",r.id).order("created_at",{ascending:true});
+const box=el("offers-"+r.id);if(!box)continue;
+if(q.error){box.innerHTML='<div class="muted">تعذر تحميل العروض.</div>';continue}
+const offers=q.data||[];
+let h=offers.length?"":"<div class=\"muted\">لا توجد عروض حتى الآن.</div>";
+for(const o of offers){h+='<div style="border-top:1px solid var(--line);padding:9px 0"><div><b>'+Number(o.unit_price||0).toLocaleString()+' ر.س/وحدة</b> · الكمية '+esc(o.quantity)+' · الشحن '+Number(o.shipping_cost||0).toLocaleString()+' ر.س</div><div class="muted">'+esc(o.notes||"بدون ملاحظات")+' · الحالة: '+esc(o.status)+'</div>'+(state.role==="merchant"&&o.status==="pending"?'<button class="btn" data-accept-offer="'+o.id+'" style="margin-top:7px">قبول العرض وفتح الصفقة</button>':"")+'</div>';}
+box.innerHTML=h;
+}
+document.querySelectorAll("[data-make-offer]").forEach(b=>b.onclick=()=>{
+const id=b.dataset.makeOffer;
+showModal("تقديم عرض",'<div class="field"><label>سعر الوحدة</label><input id="offerPrice" class="input" type="number" min="0"></div><div class="field"><label>الكمية</label><input id="offerQty" class="input" type="number" min="0"></div><div class="field"><label>تكلفة الشحن</label><input id="offerShip" class="input" type="number" min="0" value="0"></div><div class="field"><label>ملاحظات وشروط العرض</label><textarea id="offerNotes" class="input" rows="3"></textarea></div><button id="submitOffer" class="btn" style="width:100%">إرسال العرض</button>');
+el("submitOffer").onclick=async()=>{const price=Number(el("offerPrice").value),qty=Number(el("offerQty").value),ship=Number(el("offerShip").value||0);if(price<=0||qty<=0)return alert("أدخل السعر والكمية");const x=await db.from("offers").insert({request_id:id,supplier_id:state.user.id,unit_price:price,quantity:qty,shipping_cost:ship,notes:el("offerNotes").value.trim()});if(x.error)return alert(x.error.message);el("modal").classList.remove("show");await loadRemote();render()};
+});
+document.querySelectorAll("[data-accept-offer]").forEach(b=>b.onclick=async()=>{const x=await db.rpc("accept_offer",{p_offer_id:b.dataset.acceptOffer});if(x.error)return alert(x.error.message);state.dealId=x.data;await loadRemote();nav("deals")});
+}function deals(){return deal()+`<div class="section card"><h3>سجل الإجراءات</h3><p class="muted">تم رفع مستند التحميل · تم اعتماد العرض · تم تحديث حالة الصفقة</p></div>`}
 function chat(){
 const rooms=[["supplier","شركة الخليج","تفاوض الصفقة #125"],["driver","أحمد — السائق","النقل"],["admin","إدارة وسيط","حماية الصفقة"]];
 const room=rooms.find(x=>x[0]===state.chat)||rooms[0];
@@ -120,7 +143,7 @@ if(state.page==="market")main.innerHTML=market();
 if(state.page==="requests")main.innerHTML=requests();
 if(state.page==="deals")main.innerHTML=deals();
 if(state.page==="chat")main.innerHTML=chat();
-bindDeal();bindProducts();bindChat();if(state.page==="verification")loadVerification();
+bindDeal();bindProducts();bindChat();if(state.page==="verification")loadVerification();if(state.page==="requests")bindRequests();
 if(el("marketBtn"))el("marketBtn").onclick=()=>nav("market");
 }
 login();
