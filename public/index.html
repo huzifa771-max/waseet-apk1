@@ -22,9 +22,11 @@
 <body>
 <div id="root"></div>
 <div id="modal" class="modal"><div class="modalbox"><div class="head"><h3 id="modalTitle"></h3><button class="btn light" id="closeModal">إغلاق</button></div><div id="modalBody"></div></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 "use strict";
-const state={logged:false,role:"merchant",page:"home",stage:4,chat:"supplier",messages:[]};
+const db=window.supabase.createClient("https://zwsvlrptnlchajqgqtvm.supabase.co","sb_publishable_1S4CCi-cGjyJE7PO87fueg_H8NFkZrA");
+const state={logged:false,role:"merchant",page:"home",stage:0,chat:"supplier",messages:[],user:null,profile:null,dealId:null,sub:null};
 const roles={merchant:"التاجر",supplier:"المورد",driver:"السائق",admin:"الإدارة"};
 const stages=["طلب شراء","عروض الموردين","تفاوض","اتفاق","الدفع","التحميل","السائق","النقل","الوصول","الفحص","الاستلام","التسوية","الإغلاق"];
 const products=[
@@ -40,25 +42,23 @@ el("closeModal").onclick=()=>el("modal").classList.remove("show");
 
 function login(){
 document.body.innerHTML=`
-<div class="auth">
-<section class="authleft"><div class="logo">و</div><h1>وسيط</h1><p>Waseet B2B Trade & Logistics</p><p>من المنتج إلى بابك.. كل خطوة في منصة واحدة.</p></section>
-<section class="authright"><div class="authbox">
-<div style="text-align:center"><div class="logo" style="margin:auto">و</div><h2>ابدأ مع وسيط</h2><div class="muted">اختر نوع الحساب</div></div>
-<div class="roles">${Object.entries(roles).map(([k,v])=>`<button class="${state.role===k?"sel":""}" data-role="${k}">${v}</button>`).join("")}</div>
+<div class="auth"><section class="authleft"><div class="logo">و</div><h1>وسيط</h1><p>Waseet B2B Trade & Logistics</p><p>من المنتج إلى بابك.. كل خطوة في منصة واحدة.</p></section>
+<section class="authright"><div class="authbox"><div style="text-align:center"><div class="logo" style="margin:auto">و</div><h2>تسجيل الدخول</h2><div class="muted">اختر نوع الحساب وأدخل جوالك.</div></div>
+<div class="roles">${Object.entries(roles).filter(([k])=>k!=="admin").map(([k,v])=>`<button class="${state.role===k?"sel":""}" data-role="${k}">${v}</button>`).join("")}</div>
 <div class="field"><label>رقم الجوال</label><input id="phone" class="input" placeholder="05XXXXXXXX" inputmode="tel"></div>
-<button id="sendOtp" class="btn" style="width:100%">إرسال رمز التحقق</button>
-<div class="muted" style="text-align:center;margin-top:12px">نسخة الاختبار: OTP = 123456</div>
-</div></section></div>`;
+<button id="sendOtp" class="btn" style="width:100%">إرسال رمز SMS حقيقي</button>
+<div class="muted" style="text-align:center;margin-top:12px">يتطلب تفعيل مزود SMS في Supabase.</div></div></section></div>`;
 document.querySelectorAll("[data-role]").forEach(b=>b.onclick=()=>{state.role=b.dataset.role;login()});
-el("sendOtp").onclick=otp;
+el("sendOtp").onclick=async()=>{const raw=el("phone").value.trim();const p=raw.startsWith("05")?"+966"+raw.slice(1):raw.startsWith("966")?"+"+raw:raw;if(p.length<10)return alert("أدخل رقم جوال صحيح");const {error}=await db.auth.signInWithOtp({phone:p});if(error)return alert(error.message);state.pendingPhone=p;otp();};
 }
 
 function otp(){
-showModal("التحقق من الجوال",`<p class="muted">أدخل 123456 في نسخة الاختبار.</p><div class="otp">${[0,1,2,3,4,5].map(i=>`<input maxlength="1" inputmode="numeric" id="o${i}">`).join("")}</div><button id="verify" class="btn" style="width:100%;margin-top:14px">تحقق ودخول</button>`);
+showModal("التحقق من الجوال",`<p class="muted">أدخل رمز SMS المرسل إلى جوالك.</p><div class="otp">${[0,1,2,3,4,5].map(i=>`<input maxlength="1" inputmode="numeric" id="o${i}">`).join("")}</div><button id="verify" class="btn" style="width:100%;margin-top:14px">تحقق ودخول</button>`);
 document.querySelectorAll(".otp input").forEach((x,i)=>x.oninput=()=>{if(x.value&&i<5)document.getElementById("o"+(i+1)).focus()});
-el("verify").onclick=()=>{let v=[0,1,2,3,4,5].map(i=>document.getElementById("o"+i).value).join("");if(v==="123456"){state.logged=true;el("modal").classList.remove("show");render()}else{showModal("خطأ","<p>رمز التحقق غير صحيح.</p>")}};
+el("verify").onclick=async()=>{const token=[0,1,2,3,4,5].map(i=>document.getElementById("o"+i).value).join("");const {data,error}=await db.auth.verifyOtp({phone:state.pendingPhone,token,type:"sms"});if(error)return alert(error.message);state.user=data.user;let {data:p}=await db.from("profiles").select("*").eq("id",state.user.id).maybeSingle();if(!p){const r=await db.from("profiles").insert({id:state.user.id,role:state.role,phone:state.user.phone}).select().single();if(r.error)return alert(r.error.message);p=r.data}state.profile=p;state.role=p.role;state.logged=true;el("modal").classList.remove("show");await loadRemote();render();};
 }
 
+async function loadRemote(){const [p,r,d]=await Promise.all([db.from("products").select("*").eq("status","active").order("created_at",{ascending:false}),db.from("purchase_requests").select("*").order("created_at",{ascending:false}),db.from("deals").select("*").order("updated_at",{ascending:false})]);if(!p.error)products.splice(0,products.length,...(p.data||[]).map(x=>({name:x.name,price:Number(x.price).toLocaleString(),qty:x.quantity+" "+x.unit,icon:"📦",supplier:x.supplier_id,id:x.id})));state.remoteRequests=r.data||[];state.remoteDeals=d.data||[];}
 function nav(page){state.page=page;render()}
 function shell(){
 const navs=state.role==="merchant"?["home","market","requests","deals","chat"]:state.role==="supplier"?["home","requests","deals","chat"]:state.role==="driver"?["home","deals","chat"]:["home","deals","chat"];
@@ -84,7 +84,7 @@ const room=rooms.find(x=>x[0]===state.chat)||rooms[0];
 return `<div class="chat"><div class="rooms">${rooms.map(r=>`<div class="room ${state.chat===r[0]?"active":""}" data-room="${r[0]}"><b>${r[1]}</b><div class="muted">${r[2]}</div></div>`).join("")}</div><div class="chatbox"><div class="chathead"><div><b>${room[1]}</b><div class="muted">المحادثة محفوظة</div></div><button id="call" class="call">☎</button></div><div class="messages">${state.messages.length?state.messages.map(m=>`<div class="bubble ${m.me?"me":"them"}">${m.text}</div>`).join(""):"<div class='muted'>لا توجد رسائل بعد. ابدأ التفاوض من هنا.</div>"}</div><div class="compose"><textarea id="message" rows="2" placeholder="اكتب رسالة..."></textarea><button id="send" class="btn">إرسال</button></div></div></div>`}
 function bindChat(){document.querySelectorAll("[data-room]").forEach(b=>b.onclick=()=>{state.chat=b.dataset.room;render()});if(el("send"))el("send").onclick=()=>{const x=el("message").value.trim();if(x){state.messages.push({text:x,me:true});render()}};if(el("call"))el("call").onclick=()=>showModal("الاتصال الصوتي","<p>واجهة الاتصال موجودة، لكن الاتصال الهاتفي الحقيقي يحتاج مزود اتصالات/خدمة WebRTC وسيتم ربطه في مرحلة الخدمات المتصلة.</p>")}
 function render(){
-if(!state.logged){login();return}
+if(!state.logged){(async()=>{const {data}=await db.auth.getSession();if(data.session){state.user=data.session.user;const p=await db.from("profiles").select("*").eq("id",state.user.id).maybeSingle();if(p.data){state.profile=p.data;state.role=p.data.role;state.logged=true;await loadRemote();render()}else login()}else login();db.auth.onAuthStateChange(()=>{});})().catch(e=>{console.error(e);login()});return}
 document.body.innerHTML=shell();
 bindNav();
 const main=el("main");
