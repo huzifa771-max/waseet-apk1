@@ -18,7 +18,7 @@
       "spinnerColor": "#ffffff"
     },
     "StatusBar": {
-      "style": "DARK",
+      "style": "LIGHT",
       "backgroundColor": "#075fc9"
     },
     "PushNotifications": {
