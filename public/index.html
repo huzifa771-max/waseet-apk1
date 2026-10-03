@@ -324,7 +324,7 @@ function chat(v){
   const rooms=[['supplier','شركة الخليج','تفاوض'],['driver','أحمد — السائق','مهمة'],['admin','إدارة وسيط','حماية']];
   const active = rooms.find(r=>r[0]===state.chatRoom)||rooms[0];
   v.innerHTML=`<div class="chatLayout">
-    <div class="rooms">${rooms.map(r=>`<div class="room ${state.chatRoom===r[0]?'active':''}" onclick="state.chatRoom='${r[0]}';chat(\$\$('view'))">
+    <div class="rooms">${rooms.map(r=>`<div class="room ${state.chatRoom===r[0]?'active':''}" onclick="state.chatRoom='${r[0]}';chat($$('view'))">
       <div class="avatar">${r[1][0]}</div><div><b style="font-size:13px">${r[1]}</b><div class="muted">${r[2]}</div></div>
     </div>`).join('')}</div>
     <div class="chatMain">
@@ -341,9 +341,9 @@ function chat(v){
       </div>
     </div>
   </div>`;
-  const box = \$\$('messages'); if(box) box.scrollTop = box.scrollHeight;
+  const box = $$('messages'); if(box) box.scrollTop = box.scrollHeight;
 }
-function sendMessage(){const x=\$\$('msg');const txt=x?.value?.trim();if(!txt)return;state.messages[state.chatRoom].push({from:'me',text:txt});x.value='';chat(\$\$('view'))}
+function sendMessage(){const x=$$('msg');const txt=x?.value?.trim();if(!txt)return;state.messages[state.chatRoom].push({from:'me',text:txt});x.value='';chat($$('view'))}
 function notif(v){v.innerHTML=`<div class="card"><h3>🔔 الإشعارات</h3><div class="empty"><div class="icon">🔔</div>لا توجد إشعارات</div></div>`}
 function settings(v){
   v.innerHTML=`<div class="sectionTitle">🎨 المظهر</div>
@@ -360,9 +360,9 @@ function settings(v){
 function resetAll(){if(!confirm('حذف كل البيانات؟'))return;localStorage.clear();location.reload()}
 
 function render(){
-  if(!state.auth){\$\$('app').innerHTML=state.page==='onboarding'?renderOnb():renderAuth();return}
-  \$\$('app').innerHTML=shell();
-  const v=\$\$('view');
+  if(!state.auth){$$('app').innerHTML=state.page==='onboarding'?renderOnb():renderAuth();return}
+  $$('app').innerHTML=shell();
+  const v=$$('view');
   const pages={home,market,requests,deals,chat,notif,settings};
   (pages[state.page]||home)(v);
 }
