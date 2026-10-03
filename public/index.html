@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#075fc9">
+<title>وسيط — Waseet B2B</title>
+<link rel="manifest" href="manifest.json">
+<style>
+:root{--blue:#075fc9;--blue2:#123b7a;--sky:#edf6ff;--ink:#13243e;--muted:#6d7e95;--line:#dce7f3;--bg:#f5f9fe;--green:#0b9b68;--amber:#c97f00;--red:#c93c3c;--card:#fff}
+[data-theme="dark"]{--blue:#4a9cff;--blue2:#1a4b8a;--sky:#1a2638;--ink:#e8f0fb;--muted:#8ba0ba;--line:#26344a;--bg:#0d1520;--green:#22c98a;--amber:#e5a93c;--red:#ff6b6b;--card:#152234}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);font-family:'Segoe UI',Tahoma,Arial,sans-serif;color:var(--ink);transition:background .3s}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;transition:transform .12s}
+button:active{transform:scale(.97)}
+.app{min-height:100vh;display:flex}
+.side{position:fixed;right:0;top:0;bottom:0;width:250px;background:var(--card);border-left:1px solid var(--line);padding:16px 14px;z-index:40;overflow-y:auto}
+[dir="ltr"] .side{right:auto;left:0;border-left:none;border-right:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;padding:6px 10px}
+.brandMark{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,var(--blue2),var(--blue));color:#fff;display:grid;place-items:center;font-size:22px;font-weight:900}
+.brandText b{font-size:19px}.brandText small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+.roleBadge{margin:14px 5px;background:var(--sky);border:1px solid var(--line);color:var(--blue);padding:10px 12px;border-radius:12px;font-size:12px;font-weight:800}
+.nav{display:grid;gap:4px;margin-top:12px}
+.nav button{border:0;background:transparent;color:var(--muted);padding:12px;border-radius:12px;text-align:right;font-weight:700;display:flex;align-items:center;gap:8px}
+[dir="ltr"] .nav button{text-align:left}
+.nav button.active{background:var(--sky);color:var(--blue)}
+.main{margin-right:250px;width:calc(100% - 250px);min-height:100vh;display:flex;flex-direction:column}
+[dir="ltr"] .main{margin-right:0;margin-left:250px}
+.top{height:70px;position:sticky;top:0;z-index:30;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 22px;gap:12px}
+.user{display:flex;align-items:center;gap:10px}
+.avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#dcebff,#c8ddff);color:var(--blue);display:grid;place-items:center;font-weight:900}
+[data-theme="dark"] .avatar{background:linear-gradient(135deg,#243a58,#1c2c40)}
+.wrap{max-width:1350px;margin:auto;padding:22px;width:100%}
+.burger{display:none;border:0;background:var(--sky);border-radius:10px;width:40px;height:40px;font-size:19px;color:var(--blue)}
+.modeSwitch{display:flex;gap:4px;background:var(--sky);padding:4px;border-radius:12px;border:1px solid var(--line)}
+.modeSwitch button{border:0;background:transparent;padding:8px 14px;border-radius:9px;font-size:12.5px;font-weight:800;color:var(--muted)}
+.modeSwitch button.on{background:var(--card);color:var(--blue)}
+.hero{border-radius:22px;padding:26px;background:linear-gradient(115deg,var(--blue2),#1680ed);color:#fff}
+.hero h1{margin:0;font-size:26px}
+.hero p{color:#dbe9ff;margin:8px 0 0;line-height:1.75}
+.btn{border:0;border-radius:12px;padding:11px 16px;background:var(--blue);color:#fff;font-weight:800;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn.soft{background:var(--sky);color:var(--blue)}
+.btn.ghost{background:var(--card);border:1.5px solid var(--blue);color:var(--blue)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px;margin-bottom:12px;box-shadow:0 12px 34px rgba(24,70,125,.08)}
+.mt{margin-top:16px}.muted{color:var(--muted);font-size:12px}
+.stat .n{font-size:25px;font-weight:900;margin-top:7px}
+.tag{display:inline-flex;align-items:center;gap:5px;border-radius:99px;padding:5px 10px;font-size:11px;font-weight:800}
+.tag.blue{background:var(--sky);color:var(--blue)}
+.tag.green{background:rgba(11,155,104,.12);color:var(--green)}
+.tag.amber{background:rgba(201,127,0,.12);color:var(--amber)}
+h2{margin:0 0 10px}h3{margin:0 0 8px}
+.sectionTitle{font-size:19px;margin:22px 0 12px;font-weight:900}
+.kv{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.kv .cell{background:var(--sky);border:1px solid var(--line);border-radius:12px;padding:12px}
+.cell b{display:block;margin-top:5px}
+.stepper{display:grid;grid-template-columns:repeat(11,1fr);gap:4px;margin-top:15px}
+.st{text-align:center;font-size:9.5px;color:var(--muted)}
+.st .bar{height:7px;background:var(--line);border-radius:99px;margin-bottom:6px}
+.st.done{color:var(--blue);font-weight:800}
+.st.done .bar{background:linear-gradient(90deg,var(--blue),var(--blue2))}
+.table{width:100%;border-collapse:collapse;font-size:13px}
+.table th,.table td{padding:11px;border-bottom:1px solid var(--line);text-align:right}
+[dir="ltr"] .table th,[dir="ltr"] .table td{text-align:left}
+.table th{font-size:11px;color:var(--muted);background:var(--sky)}
+.input,.select,.textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);outline:none}
+.input:focus,.textarea:focus{border-color:var(--blue)}
+.field label{display:block;font-size:11px;color:var(--muted);font-weight:800;margin-bottom:6px}
+.products{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.prodPic{height:130px;border-radius:13px;background:linear-gradient(135deg,#eef7ff,#dbeaff);display:grid;place-items:center;font-size:52px}
+[data-theme="dark"] .prodPic{background:linear-gradient(135deg,#1a2638,#22344a)}
+.price{color:var(--blue);font-size:20px;font-weight:900;margin:7px 0}
+.row{display:flex;align-items:center;gap:10px}
+.space{justify-content:space-between}
+.auth{min-height:100vh;display:grid;grid-template-columns:1.1fr .9fr;background:var(--card)}
+.authHero{padding:56px;background:linear-gradient(135deg,var(--blue2),#1680ed);color:#fff;display:flex;flex-direction:column;justify-content:center}
+.authHero h1{font-size:44px;margin:0 0 10px}
+.authHero p{max-width:560px;line-height:1.8;color:#d8e8ff}
+.authForm{padding:40px;display:flex;align-items:center;justify-content:center}
+.authBox{width:min(460px,100%)}
+.roleGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:14px 0}
+.role{padding:11px;border:1px solid var(--line);background:var(--card);border-radius:12px;text-align:center;font-size:12px;font-weight:800;color:var(--ink)}
+.role.on{background:var(--sky);border-color:var(--blue);color:var(--blue)}
+.otp{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.otp input{text-align:center;font-size:21px;font-weight:900;padding:12px;border:1px solid var(--line);border-radius:11px;background:var(--card)}
+.otp input:focus{border-color:var(--blue)}
+.chatLayout{display:grid;grid-template-columns:280px 1fr;gap:14px;min-height:620px}
+.rooms,.chatMain{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.room{padding:13px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;gap:10px}
+.room:hover{background:var(--sky)}
+.room.active{background:var(--sky);border-right:3px solid var(--blue)}
+[dir="ltr"] .room.active{border-right:none;border-left:3px solid var(--blue)}
+.messages{height:480px;overflow:auto;background:var(--bg);padding:16px}
+.bubble{max-width:70%;padding:10px 12px;margin:7px 0;border-radius:14px;line-height:1.6;font-size:13.5px}
+.bubble.me{background:var(--blue);color:#fff;margin-right:auto;border-bottom-right-radius:4px}
+[dir="ltr"] .bubble.me{margin-right:0;margin-left:auto}
+.bubble.them{background:var(--card);border:1px solid var(--line);margin-left:auto;border-bottom-left-radius:4px}
+.compose{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);background:var(--card)}
+.compose textarea{flex:1;resize:none}
+.chatHead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.chatIdentity{display:flex;align-items:center;gap:10px}
+.voiceBtn{min-width:48px;height:42px;padding:0 13px;border-radius:12px;background:var(--sky);color:var(--blue);border:1px solid var(--line);font-size:20px;font-weight:900}
+.empty{padding:30px;text-align:center;background:var(--sky);border:1px dashed var(--line);border-radius:14px;color:var(--muted)}
+.empty .icon{font-size:40px;margin-bottom:8px;opacity:.5}
+.toast{position:fixed;bottom:86px;right:50%;transform:translateX(50%);background:#10233e;color:#fff;padding:12px 20px;border-radius:30px;font-size:13px;display:none;z-index:70;max-width:92%;text-align:center}
+.modal{position:fixed;inset:0;background:rgba(7,26,55,.75);z-index:60;display:none;align-items:center;justify-content:center;padding:20px}
+.modal.show{display:flex}
+.modalBox{width:min(720px,100%);max-height:90vh;overflow:auto;background:var(--card);border-radius:18px;padding:22px}
+.modalHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.close{border:0;background:var(--sky);border-radius:50%;width:34px;height:34px;font-size:18px;color:var(--ink)}
+.navbar{display:none;position:fixed;bottom:0;right:0;left:0;background:var(--card);border-top:1px solid var(--line);height:66px;z-index:50}
+.navbar button{flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font-size:10.5px}
+.navbar button.active{color:var(--blue);font-weight:700}
+.navbar .ico{font-size:19px}
+.langSwitch{display:flex;gap:4px;background:var(--sky);padding:3px;border-radius:10px;border:1px solid var(--line)}
+.langSwitch button{border:0;background:transparent;padding:5px 10px;border-radius:7px;font-size:11.5px;font-weight:800;color:var(--muted)}
+.langSwitch button.on{background:var(--card);color:var(--blue)}
+@media(max-width:1050px){.side{width:76px}.brandText,.roleBadge,.nav span{display:none}.nav button{justify-content:center}.main{margin-right:76px;width:calc(100% - 76px)}.grid,.products,.kv{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:720px){
+ .top{padding:0 14px;height:64px}.wrap{padding:14px}
+ .grid,.products,.kv{grid-template-columns:1fr}
+ .chatLayout{grid-template-columns:1fr}
+ .auth{grid-template-columns:1fr}.authHero{display:none}.authForm{padding:18px}
+ .roleGrid{grid-template-columns:1fr 1fr}
+ .main{margin-right:0;width:100%}
+ .side{transform:translateX(100%)}.side.open{transform:translateX(0)}
+ .burger{display:grid;place-items:center}
+ .navbar{display:flex}
+ .otp{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+<div class="modal" id="modal"><div class="modalBox"><div class="modalHead"><h2 id="modalTitle"></h2><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
+
+<script>
+'use strict';
+const I18N = {
+  ar: { app_name:'وسيط', tagline:'Trade · Logistics · Trust', login:'تسجيل الدخول', login_sub:'اختر الدور ثم OTP: 123456', send_otp:'إرسال OTP', verify:'تحقق ودخول', role_trader:'تاجر ومورد', role_driver:'السائق', role_admin:'الإدارة', buy:'🛒 أشتري', sell:'📦 أبيع', nav_home:'الرئيسية', nav_market:'السوق', nav_requests:'طلباتي', nav_deals:'الصفقات', nav_chat:'الدردشة', nav_notif:'الإشعارات', nav_settings:'الإعدادات', home_hero_buy:'اشترِ بثقة.. وبِع بذكاء', home_hero_sell:'أدر مبيعاتك.. ونمِّ أرباحك', send:'إرسال', view:'عرض', open:'فتح', logout:'تسجيل الخروج' },
+  en: { app_name:'Waseet', tagline:'Trade · Logistics · Trust', login:'Sign in', login_sub:'Choose role, OTP: 123456', send_otp:'Send OTP', verify:'Verify', role_trader:'Trader', role_driver:'Driver', role_admin:'Admin', buy:'🛒 Buy', sell:'📦 Sell', nav_home:'Home', nav_market:'Market', nav_requests:'Requests', nav_deals:'Deals', nav_chat:'Chat', nav_notif:'Notifications', nav_settings:'Settings', home_hero_buy:'Buy with confidence', home_hero_sell:'Manage your sales', send:'Send', view:'View', open:'Open', logout:'Sign out' }
+};
+let LANG = 'ar', THEME = 'light';
+const t = k => I18N[LANG]?.[k] || I18N.ar[k] || k;
+const $$ = id => document.getElementById(id);
+const store = { get:(k,f)=> { try{ const v=localStorage.getItem(k); return v?JSON.parse(v):f }catch{return f} }, set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}} };
+const state = { page:'onboarding', onbIdx:0, role:null, user:null, auth:null, tradeMode:'buy', chatRoom:'supplier', dealStep:2, messages:{supplier:[],driver:[],admin:[]} };
+const DEMO_USERS = { trader:{name:'خالد أحمد — الأفق للتجارة', phone:'0550000001', otp:'123456'}, driver:{name:'أحمد — السائق', phone:'0550000003', otp:'123456'}, admin:{name:'إدارة وسيط', phone:'0550000004', otp:'123456'} };
+const ROLES = ['trader','driver','admin'];
+const DEAL_STEPS = ['طلب جديد','تفاوض','اتفاق معتمد','بانتظار الدفع','الدفع قيد التحقق','تم الدفع','قيد التحميل','تم التحميل','قيد النقل','وصل','قيد الفحص','تم الاستلام','تم تحرير المبلغ','مكتملة'];
+const DEAL_MILESTONES = ['طلب','تفاوض','اعتماد','دفع','تحميل','نقل','وصول','فحص','استلام','تسوية','إغلاق'];
+
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', THEME);
+  document.documentElement.setAttribute('dir', LANG==='ar'?'rtl':'ltr');
+}
+function toast(t) { const e=$$('toast'); if(!e) return; e.textContent=t; e.style.display='block'; clearTimeout(window.__t); window.__t=setTimeout(()=>e.style.display='none', 2500); }
+function openModal(title, body) { $$('modalTitle').textContent = title; $$('modalBody').innerHTML = body; $$('modal').classList.add('show'); }
+function closeModal() { $$('modal').classList.remove('show'); }
+
+function renderOnb() {
+  const items = [
+    { i:'🌙', t:'وضع ليلي كامل', d:'تبديل فوري' },
+    { i:'📴', t:'يعمل بدون إنترنت', d:'PWA + Offline' },
+    { i:'🔐', t:'تشفير E2EE', d:'رسائل آمنة' }
+  ];
+  const o = items[state.onbIdx];
+  return `<div style="min-height:100vh;display:grid;place-items:center;background:linear-gradient(135deg,#123b7a,#1680ed);padding:20px;color:#fff">
+    <div style="max-width:420px;text-align:center;width:100%">
+      <div style="font-size:13px;font-weight:800;opacity:.9">WASEET v12</div>
+      <h1 style="font-size:44px;margin:6px 0 10px">${t('app_name')}</h1>
+      <p style="color:#d8e8ff;margin-bottom:30px">${t('tagline')}</p>
+      <div style="width:140px;height:140px;border-radius:32px;background:rgba(255,255,255,.15);display:grid;place-items:center;font-size:64px;margin:0 auto 18px">${o.i}</div>
+      <h2 style="font-size:22px;margin:0 0 8px">${o.t}</h2>
+      <p style="color:#d8e8ff">${o.d}</p>
+      <div style="display:flex;gap:6px;justify-content:center;margin:20px 0">
+        ${items.map((_,i)=>`<span style="width:${i===state.onbIdx?'20px':'8px'};height:8px;border-radius:99px;background:${i===state.onbIdx?'#fff':'rgba(255,255,255,.4)'}"></span>`).join('')}
+      </div>
+      <button class="btn" style="width:100%;background:#fff;color:#075fc9;padding:14px" onclick="onbNext()">${state.onbIdx<2?'التالي':'ابدأ الآن 🚀'}</button>
+      <div style="margin-top:16px"><span style="color:#d8e8ff;cursor:pointer" onclick="state.page='login';render()">${t('login')}</span></div>
+    </div></div>`;
+}
+function onbNext() { if(state.onbIdx<2){state.onbIdx++;render()} else {state.page='login';render()} }
+
+let loginRole='trader', otpSent=false;
+function renderAuth() {
+  return `<div class="auth">
+    <section class="authHero">
+      <h1>${t('app_name')}</h1>
+      <p>${t('tagline')}</p>
+    </section>
+    <section class="authForm"><div class="authBox">
+      <div style="text-align:center">
+        <h2>${t('login')}</h2>
+        <p class="muted">${t('login_sub')}</p>
+      </div>
+      <div class="roleGrid">${ROLES.map(r=>`<button class="role ${loginRole===r?'on':''}" onclick="pickRole('${r}')">${t('role_'+r)}</button>`).join('')}</div>
+      <div class="field"><label>الجوال</label><input class="input" value="${DEMO_USERS[loginRole].phone}" readonly></div>
+      <button class="btn ghost" style="width:100%;margin-top:10px" onclick="sendOtp()">${t('send_otp')}</button>
+      ${otpSent?`<div style="margin-top:14px">
+        <label style="display:block;font-size:11px;color:var(--muted);font-weight:800;margin-bottom:6px">OTP: 123456</label>
+        <div class="otp">${[0,1,2,3,4,5].map(i=>`<input maxlength="1" inputmode="numeric" id="o${i}" oninput="otpNext(${i})">`).join('')}</div>
+        <button class="btn" style="width:100%;margin-top:12px" onclick="verifyOtp()">${t('verify')}</button>
+      </div>`:''}
+    </div></section></div>`;
+}
+function pickRole(r){loginRole=r;otpSent=false;render()}
+function sendOtp(){otpSent=true;render();toast('OTP: 123456')}
+function otpNext(i){const n=$$('o'+i);if(n&&n.value&&i<5)$$('o'+(i+1)).focus()}
+function verifyOtp(){let c='';for(let i=0;i<6;i++)c+=$$('o'+i)?.value||'';if(c!==DEMO_USERS[loginRole].otp){toast('⛔');return}state.auth=true;state.role=loginRole;state.user=DEMO_USERS[loginRole];state.page='home';render()}
+function setLang(l){LANG=l;store.set('lang',l);applyTheme();render()}
+function toggleTheme(){THEME=THEME==='light'?'dark':'light';store.set('theme',THEME);applyTheme();render()}
+function clearSession(){state.auth=null;state.role=null;state.user=null;state.page='onboarding';render()}
+
+function icon(p){return {home:'⌂',market:'▦',requests:'＋',deals:'◫',chat:'◉',notif:'🔔',settings:'⚙'}[p]||'•'}
+function pageTitle(p){return {home:'منصة وسيط',market:'السوق',requests:'طلباتي',deals:'الصفقات',chat:'الدردشة',notif:'الإشعارات',settings:'الإعدادات'}[p]||'وسيط'}
+function navItems(){
+  if(state.role==='trader'){
+    if(state.tradeMode==='buy') return [['home','الرئيسية'],['market','السوق'],['requests','طلباتي'],['deals','الصفقات'],['chat','الدردشة'],['notif','الإشعارات'],['settings','الإعدادات']];
+    return [['home','الرئيسية'],['deals','الصفقات'],['chat','الدردشة'],['notif','الإشعارات'],['settings','الإعدادات']];
+  }
+  if(state.role==='driver') return [['home','المهمة'],['deals','الشحنات'],['chat','الدردشة'],['settings','الإعدادات']];
+  return [['home','لوحة الإدارة'],['deals','الصفقات'],['chat','الدردشة'],['notif','الإشعارات'],['settings','الإعدادات']];
+}
+function nav(p){state.page=p;render();window.scrollTo({top:0,behavior:'smooth'})}
+function toggleSide(){document.querySelector('.side')?.classList.toggle('open')}
+function shell(){
+  const navs = navItems();
+  return `<div class="app">
+    <aside class="side">
+      <div class="brand"><div class="brandMark">و</div><div class="brandText"><b>${t('app_name')}</b><small>Waseet v12</small></div></div>
+      <div class="roleBadge">${t('role_'+state.role)}</div>
+      <div class="nav">${navs.map(([p,l])=>`<button class="${state.page===p?'active':''}" onclick="nav('${p}')">${icon(p)} <span>${l}</span></button>`).join('')}</div>
+      <div style="position:absolute;bottom:18px;left:14px;right:14px"><button class="btn ghost" style="width:100%" onclick="clearSession()">${t('logout')}</button></div>
+    </aside>
+    <main class="main">
+      <header class="top">
+        <div class="row"><button class="burger" onclick="toggleSide()">☰</button>
+          <div><b style="font-size:19px">${pageTitle(state.page)}</b><div style="font-size:11px;color:var(--muted);margin-top:2px">${state.user.name}</div></div>
+        </div>
+        <div class="user">
+          ${state.role==='trader'?`<div class="modeSwitch">
+            <button class="${state.tradeMode==='buy'?'on':''}" onclick="setMode('buy')">${t('buy')}</button>
+            <button class="${state.tradeMode==='sell'?'on':''}" onclick="setMode('sell')">${t('sell')}</button>
+          </div>`:''}
+          <div class="langSwitch">
+            <button class="${LANG==='ar'?'on':''}" onclick="setLang('ar')">🇸🇦</button>
+            <button class="${LANG==='en'?'on':''}" onclick="setLang('en')">🇬🇧</button>
+          </div>
+          <button class="voiceBtn" onclick="toggleTheme()">${THEME==='dark'?'☀️':'🌙'}</button>
+          <div class="avatar">${state.user.name[0]}</div>
+        </div>
+      </header>
+      <div class="wrap" id="view"></div>
+    </main>
+    <div class="navbar">${navItems().slice(0,5).map(([p,l])=>`<button class="${state.page===p?'active':''}" onclick="nav('${p}')"><span class="ico">${icon(p)}</span>${l}</button>`).join('')}</div>
+  </div>`;
+}
+function setMode(m){state.tradeMode=m;state.page='home';render()}
+function stepper(){return `<div class="stepper">${DEAL_MILESTONES.map((x,i)=>`<div class="st ${i<=state.dealStep?'done':''}"><div class="bar"></div>${x}</div>`).join('')}</div>`}
+
+function home(v){
+  const isBuy = state.tradeMode==='buy';
+  v.innerHTML = `
+    <section class="hero">
+      <div><h1>${isBuy?t('home_hero_buy'):t('home_hero_sell')}</h1>
+        <p>${isBuy?'تصفح آلاف المنتجات':'اعرض منتجاتك لآلاف التجار'}</p>
+      </div>
+    </section>
+    <div class="grid mt">
+      <div class="card stat"><div class="muted">${isBuy?'مشترياتي':'مبيعاتي'}</div><div class="n">${isBuy?'540,000':'664,000'}</div><div class="muted">ر.س</div></div>
+      <div class="card stat"><div class="muted">الصفقات</div><div class="n">2</div></div>
+      <div class="card stat"><div class="muted">الطلبات</div><div class="n">${isBuy?'24':'18'}</div></div>
+      <div class="card stat"><div class="muted">التقييم</div><div class="n">4.8 ★</div></div>
+    </div>
+    <div class="sectionTitle">📋 الصفقة الحالية</div>
+    <div class="card">
+      <div class="row space" style="align-items:flex-start;margin-bottom:12px">
+        <div><span class="tag blue">${DEAL_STEPS[state.dealStep]}</span><h2 style="margin-top:8px">#WST-000125 · أرز بسمتي</h2></div>
+        <button class="btn soft" onclick="nav('deals')">${t('open')}</button>
+      </div>
+      ${stepper()}
+    </div>
+    <div class="sectionTitle">⚡ إجراءات سريعة</div>
+    <div class="grid">
+      <div class="card" style="cursor:pointer" onclick="nav('chat')"><b>💬 الدردشة</b></div>
+      <div class="card" style="cursor:pointer" onclick="toast('Escrow')"><b>🛡️ Escrow</b></div>
+      <div class="card" style="cursor:pointer" onclick="toast('Invoice')"><b>🧾 فاتورة</b></div>
+      <div class="card" style="cursor:pointer" onclick="toast('العقود')"><b>📄 العقود</b></div>
+    </div>`;
+}
+function market(v){
+  const p=[['أرز بسمتي','1,180 ر.س','500 طن','🌾','شركة الخليج','4.8'],['سكر أبيض','1,200 ر.س','300 طن','⬜','شركة النخبة','4.7'],['زيت دوار الشمس','1,160 ر.س','200 كرتون','🫗','تك تريد','4.9'],['تمور سكري','1,600 ر.س','120 كرتون','🌴','مزارع الوادي','4.8']];
+  v.innerHTML=`<input class="input" placeholder="🔍 ابحث..." style="margin-bottom:12px;max-width:400px">
+    <div class="products">${p.map(x=>`<article class="card" style="margin:0">
+      <div class="prodPic">${x[3]}</div>
+      <h3 style="margin:9px 0 4px">${x[0]}</h3>
+      <div class="muted">${x[4]} · ${x[5]} ★ · ${x[2]}</div>
+      <div class="price">${x[1]}</div>
+      <div class="row" style="gap:7px"><button class="btn" style="flex:1" onclick="toast('${x[0]}')">${t('view')}</button><button class="btn soft" style="flex:1" onclick="nav('chat')">💬</button></div>
+    </article>`).join('')}</div>`;
+}
+function requests(v){v.innerHTML=`<div class="card"><h3>طلباتي</h3><table class="table mt"><tr><th>المنتج</th><th>الكمية</th><th>الحالة</th></tr><tr><td>خوذ سلامة</td><td>500</td><td><span class="tag amber">مراجعة</span></td></tr><tr><td>ألواح شمسية</td><td>200</td><td><span class="tag green">✓</span></td></tr></table></div>`}
+function deals(v){
+  v.innerHTML=`<div class="card">
+    <div class="row space" style="align-items:flex-start;margin-bottom:12px">
+      <div><span class="tag blue">${DEAL_STEPS[state.dealStep]}</span><h2 style="margin-top:9px">#WST-000125</h2></div>
+      <span class="tag green">🛡️ Escrow</span>
+    </div>
+    <div class="kv">
+      <div class="cell"><span class="muted">البضاعة</span><b>590,000 ر.س</b></div>
+      <div class="cell"><span class="muted">الشحن</span><b>20,000 ر.س</b></div>
+      <div class="cell"><span class="muted">الإجمالي</span><b>610,000 ر.س</b></div>
+      <div class="cell"><span class="muted">الدفع</span><b>غير مدفوع</b></div>
+    </div>
+    ${stepper()}
+  </div>
+  <button class="btn" style="width:100%" onclick="advanceDeal()">الخطوة التالية ←</button>`;
+}
+function advanceDeal(){if(state.dealStep>=DEAL_STEPS.length-1){toast('مكتملة');return}state.dealStep++;toast('→ '+DEAL_STEPS[state.dealStep]);render()}
+function chat(v){
+  const rooms=[['supplier','شركة الخليج','تفاوض'],['driver','أحمد — السائق','مهمة'],['admin','إدارة وسيط','حماية']];
+  const active = rooms.find(r=>r[0]===state.chatRoom)||rooms[0];
+  v.innerHTML=`<div class="chatLayout">
+    <div class="rooms">${rooms.map(r=>`<div class="room ${state.chatRoom===r[0]?'active':''}" onclick="state.chatRoom='${r[0]}';chat(\$\$('view'))">
+      <div class="avatar">${r[1][0]}</div><div><b style="font-size:13px">${r[1]}</b><div class="muted">${r[2]}</div></div>
+    </div>`).join('')}</div>
+    <div class="chatMain">
+      <div class="chatHead">
+        <div class="chatIdentity"><div class="avatar">${active[1][0]}</div><div><b>${active[1]}</b><div class="muted">● online</div></div></div>
+        <button class="btn soft" onclick="toast('☎ مكالمة')">☎</button>
+      </div>
+      <div class="messages" id="messages">
+        ${state.messages[state.chatRoom].length ? state.messages[state.chatRoom].map(m=>`<div class="bubble ${m.from==='me'?'me':'them'}">${m.text}</div>`).join('') : '<div class="empty"><div class="icon">💬</div>لا توجد رسائل</div>'}
+      </div>
+      <div class="compose">
+        <textarea id="msg" class="textarea" rows="2" placeholder="اكتب..."></textarea>
+        <button class="btn" onclick="sendMessage()">${t('send')}</button>
+      </div>
+    </div>
+  </div>`;
+  const box = \$\$('messages'); if(box) box.scrollTop = box.scrollHeight;
+}
+function sendMessage(){const x=\$\$('msg');const txt=x?.value?.trim();if(!txt)return;state.messages[state.chatRoom].push({from:'me',text:txt});x.value='';chat(\$\$('view'))}
+function notif(v){v.innerHTML=`<div class="card"><h3>🔔 الإشعارات</h3><div class="empty"><div class="icon">🔔</div>لا توجد إشعارات</div></div>`}
+function settings(v){
+  v.innerHTML=`<div class="sectionTitle">🎨 المظهر</div>
+    <div class="card"><div class="row space"><span>${THEME==='dark'?'داكن':'فاتح'}</span><button class="btn soft" onclick="toggleTheme()">${THEME==='dark'?'☀️':'🌙'}</button></div></div>
+    <div class="sectionTitle">🌍 اللغة</div>
+    <div class="card"><div class="row space"><span>${LANG==='ar'?'العربية':'English'}</span><div class="langSwitch">
+      <button class="${LANG==='ar'?'on':''}" onclick="setLang('ar')">AR</button>
+      <button class="${LANG==='en'?'on':''}" onclick="setLang('en')">EN</button>
+    </div></div></div>
+    <div class="sectionTitle">📱 التطبيق</div>
+    <div class="card"><div><b>الإصدار:</b> v12.0.0</div><div style="margin-top:8px"><b>الوضع:</b> PWA/APK</div></div>
+    <div class="card" style="text-align:center"><button class="btn ghost" onclick="resetAll()">🔄 إعادة تعيين</button></div>`;
+}
+function resetAll(){if(!confirm('حذف كل البيانات؟'))return;localStorage.clear();location.reload()}
+
+function render(){
+  if(!state.auth){\$\$('app').innerHTML=state.page==='onboarding'?renderOnb():renderAuth();return}
+  \$\$('app').innerHTML=shell();
+  const v=\$\$('view');
+  const pages={home,market,requests,deals,chat,notif,settings};
+  (pages[state.page]||home)(v);
+}
+
+(function boot(){
+  LANG = store.get('lang','ar');
+  THEME = store.get('theme','light');
+  applyTheme();
+  if('serviceWorker' in navigator && location.protocol!=='file:'){
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  }
+  render();
+})();
+</script>
+</body>
+</html>
