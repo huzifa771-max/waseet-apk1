@@ -4,378 +4,61 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#075fc9">
-<title>وسيط — Waseet B2B</title>
-<link rel="manifest" href="manifest.json">
+<title>وسيط | Waseet B2B Trade & Logistics</title>
+<link rel="manifest" href="./manifest.json">
 <style>
-:root{--blue:#075fc9;--blue2:#123b7a;--sky:#edf6ff;--ink:#13243e;--muted:#6d7e95;--line:#dce7f3;--bg:#f5f9fe;--green:#0b9b68;--amber:#c97f00;--red:#c93c3c;--card:#fff}
-[data-theme="dark"]{--blue:#4a9cff;--blue2:#1a4b8a;--sky:#1a2638;--ink:#e8f0fb;--muted:#8ba0ba;--line:#26344a;--bg:#0d1520;--green:#22c98a;--amber:#e5a93c;--red:#ff6b6b;--card:#152234}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:var(--bg);font-family:'Segoe UI',Tahoma,Arial,sans-serif;color:var(--ink);transition:background .3s}
-button,input,textarea,select{font:inherit;color:inherit}
-button{cursor:pointer;transition:transform .12s}
-button:active{transform:scale(.97)}
-.app{min-height:100vh;display:flex}
-.side{position:fixed;right:0;top:0;bottom:0;width:250px;background:var(--card);border-left:1px solid var(--line);padding:16px 14px;z-index:40;overflow-y:auto}
-[dir="ltr"] .side{right:auto;left:0;border-left:none;border-right:1px solid var(--line)}
-.brand{display:flex;align-items:center;gap:10px;padding:6px 10px}
-.brandMark{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,var(--blue2),var(--blue));color:#fff;display:grid;place-items:center;font-size:22px;font-weight:900}
-.brandText b{font-size:19px}.brandText small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
-.roleBadge{margin:14px 5px;background:var(--sky);border:1px solid var(--line);color:var(--blue);padding:10px 12px;border-radius:12px;font-size:12px;font-weight:800}
-.nav{display:grid;gap:4px;margin-top:12px}
-.nav button{border:0;background:transparent;color:var(--muted);padding:12px;border-radius:12px;text-align:right;font-weight:700;display:flex;align-items:center;gap:8px}
-[dir="ltr"] .nav button{text-align:left}
-.nav button.active{background:var(--sky);color:var(--blue)}
-.main{margin-right:250px;width:calc(100% - 250px);min-height:100vh;display:flex;flex-direction:column}
-[dir="ltr"] .main{margin-right:0;margin-left:250px}
-.top{height:70px;position:sticky;top:0;z-index:30;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 22px;gap:12px}
-.user{display:flex;align-items:center;gap:10px}
-.avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#dcebff,#c8ddff);color:var(--blue);display:grid;place-items:center;font-weight:900}
-[data-theme="dark"] .avatar{background:linear-gradient(135deg,#243a58,#1c2c40)}
-.wrap{max-width:1350px;margin:auto;padding:22px;width:100%}
-.burger{display:none;border:0;background:var(--sky);border-radius:10px;width:40px;height:40px;font-size:19px;color:var(--blue)}
-.modeSwitch{display:flex;gap:4px;background:var(--sky);padding:4px;border-radius:12px;border:1px solid var(--line)}
-.modeSwitch button{border:0;background:transparent;padding:8px 14px;border-radius:9px;font-size:12.5px;font-weight:800;color:var(--muted)}
-.modeSwitch button.on{background:var(--card);color:var(--blue)}
-.hero{border-radius:22px;padding:26px;background:linear-gradient(115deg,var(--blue2),#1680ed);color:#fff}
-.hero h1{margin:0;font-size:26px}
-.hero p{color:#dbe9ff;margin:8px 0 0;line-height:1.75}
-.btn{border:0;border-radius:12px;padding:11px 16px;background:var(--blue);color:#fff;font-weight:800;display:inline-flex;align-items:center;justify-content:center;gap:6px}
-.btn.soft{background:var(--sky);color:var(--blue)}
-.btn.ghost{background:var(--card);border:1.5px solid var(--blue);color:var(--blue)}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px;margin-bottom:12px;box-shadow:0 12px 34px rgba(24,70,125,.08)}
-.mt{margin-top:16px}.muted{color:var(--muted);font-size:12px}
-.stat .n{font-size:25px;font-weight:900;margin-top:7px}
-.tag{display:inline-flex;align-items:center;gap:5px;border-radius:99px;padding:5px 10px;font-size:11px;font-weight:800}
-.tag.blue{background:var(--sky);color:var(--blue)}
-.tag.green{background:rgba(11,155,104,.12);color:var(--green)}
-.tag.amber{background:rgba(201,127,0,.12);color:var(--amber)}
-h2{margin:0 0 10px}h3{margin:0 0 8px}
-.sectionTitle{font-size:19px;margin:22px 0 12px;font-weight:900}
-.kv{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.kv .cell{background:var(--sky);border:1px solid var(--line);border-radius:12px;padding:12px}
-.cell b{display:block;margin-top:5px}
-.stepper{display:grid;grid-template-columns:repeat(11,1fr);gap:4px;margin-top:15px}
-.st{text-align:center;font-size:9.5px;color:var(--muted)}
-.st .bar{height:7px;background:var(--line);border-radius:99px;margin-bottom:6px}
-.st.done{color:var(--blue);font-weight:800}
-.st.done .bar{background:linear-gradient(90deg,var(--blue),var(--blue2))}
-.table{width:100%;border-collapse:collapse;font-size:13px}
-.table th,.table td{padding:11px;border-bottom:1px solid var(--line);text-align:right}
-[dir="ltr"] .table th,[dir="ltr"] .table td{text-align:left}
-.table th{font-size:11px;color:var(--muted);background:var(--sky)}
-.input,.select,.textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);outline:none}
-.input:focus,.textarea:focus{border-color:var(--blue)}
-.field label{display:block;font-size:11px;color:var(--muted);font-weight:800;margin-bottom:6px}
-.products{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.prodPic{height:130px;border-radius:13px;background:linear-gradient(135deg,#eef7ff,#dbeaff);display:grid;place-items:center;font-size:52px}
-[data-theme="dark"] .prodPic{background:linear-gradient(135deg,#1a2638,#22344a)}
-.price{color:var(--blue);font-size:20px;font-weight:900;margin:7px 0}
-.row{display:flex;align-items:center;gap:10px}
-.space{justify-content:space-between}
-.auth{min-height:100vh;display:grid;grid-template-columns:1.1fr .9fr;background:var(--card)}
-.authHero{padding:56px;background:linear-gradient(135deg,var(--blue2),#1680ed);color:#fff;display:flex;flex-direction:column;justify-content:center}
-.authHero h1{font-size:44px;margin:0 0 10px}
-.authHero p{max-width:560px;line-height:1.8;color:#d8e8ff}
-.authForm{padding:40px;display:flex;align-items:center;justify-content:center}
-.authBox{width:min(460px,100%)}
-.roleGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:14px 0}
-.role{padding:11px;border:1px solid var(--line);background:var(--card);border-radius:12px;text-align:center;font-size:12px;font-weight:800;color:var(--ink)}
-.role.on{background:var(--sky);border-color:var(--blue);color:var(--blue)}
-.otp{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
-.otp input{text-align:center;font-size:21px;font-weight:900;padding:12px;border:1px solid var(--line);border-radius:11px;background:var(--card)}
-.otp input:focus{border-color:var(--blue)}
-.chatLayout{display:grid;grid-template-columns:280px 1fr;gap:14px;min-height:620px}
-.rooms,.chatMain{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
-.room{padding:13px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;gap:10px}
-.room:hover{background:var(--sky)}
-.room.active{background:var(--sky);border-right:3px solid var(--blue)}
-[dir="ltr"] .room.active{border-right:none;border-left:3px solid var(--blue)}
-.messages{height:480px;overflow:auto;background:var(--bg);padding:16px}
-.bubble{max-width:70%;padding:10px 12px;margin:7px 0;border-radius:14px;line-height:1.6;font-size:13.5px}
-.bubble.me{background:var(--blue);color:#fff;margin-right:auto;border-bottom-right-radius:4px}
-[dir="ltr"] .bubble.me{margin-right:0;margin-left:auto}
-.bubble.them{background:var(--card);border:1px solid var(--line);margin-left:auto;border-bottom-left-radius:4px}
-.compose{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);background:var(--card)}
-.compose textarea{flex:1;resize:none}
-.chatHead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
-.chatIdentity{display:flex;align-items:center;gap:10px}
-.voiceBtn{min-width:48px;height:42px;padding:0 13px;border-radius:12px;background:var(--sky);color:var(--blue);border:1px solid var(--line);font-size:20px;font-weight:900}
-.empty{padding:30px;text-align:center;background:var(--sky);border:1px dashed var(--line);border-radius:14px;color:var(--muted)}
-.empty .icon{font-size:40px;margin-bottom:8px;opacity:.5}
-.toast{position:fixed;bottom:86px;right:50%;transform:translateX(50%);background:#10233e;color:#fff;padding:12px 20px;border-radius:30px;font-size:13px;display:none;z-index:70;max-width:92%;text-align:center}
-.modal{position:fixed;inset:0;background:rgba(7,26,55,.75);z-index:60;display:none;align-items:center;justify-content:center;padding:20px}
-.modal.show{display:flex}
-.modalBox{width:min(720px,100%);max-height:90vh;overflow:auto;background:var(--card);border-radius:18px;padding:22px}
-.modalHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.close{border:0;background:var(--sky);border-radius:50%;width:34px;height:34px;font-size:18px;color:var(--ink)}
-.navbar{display:none;position:fixed;bottom:0;right:0;left:0;background:var(--card);border-top:1px solid var(--line);height:66px;z-index:50}
-.navbar button{flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font-size:10.5px}
-.navbar button.active{color:var(--blue);font-weight:700}
-.navbar .ico{font-size:19px}
-.langSwitch{display:flex;gap:4px;background:var(--sky);padding:3px;border-radius:10px;border:1px solid var(--line)}
-.langSwitch button{border:0;background:transparent;padding:5px 10px;border-radius:7px;font-size:11.5px;font-weight:800;color:var(--muted)}
-.langSwitch button.on{background:var(--card);color:var(--blue)}
-@media(max-width:1050px){.side{width:76px}.brandText,.roleBadge,.nav span{display:none}.nav button{justify-content:center}.main{margin-right:76px;width:calc(100% - 76px)}.grid,.products,.kv{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:720px){
- .top{padding:0 14px;height:64px}.wrap{padding:14px}
- .grid,.products,.kv{grid-template-columns:1fr}
- .chatLayout{grid-template-columns:1fr}
- .auth{grid-template-columns:1fr}.authHero{display:none}.authForm{padding:18px}
- .roleGrid{grid-template-columns:1fr 1fr}
- .main{margin-right:0;width:100%}
- .side{transform:translateX(100%)}.side.open{transform:translateX(0)}
- .burger{display:grid;place-items:center}
- .navbar{display:flex}
- .otp{grid-template-columns:repeat(3,1fr)}
-}
+:root{--p:#075fc9;--p2:#073b82;--sky:#eef6ff;--bg:#f7faff;--card:#fff;--ink:#10233f;--muted:#718198;--line:#dce7f3;--ok:#11966a;--warn:#d48a13;--danger:#d44949;--shadow:0 16px 45px rgba(16,54,101,.09)}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,"Segoe UI",Tahoma,Arial,sans-serif;background:var(--bg);color:var(--ink)}button,input,textarea,select{font:inherit}button{cursor:pointer}.app{min-height:100vh}.hide{display:none!important}
+.topbar{height:72px;background:rgba(255,255,255,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:20}.brand{display:flex;align-items:center;gap:11px}.logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,var(--p2),#1684ee);color:#fff;display:grid;place-items:center;font-size:21px;font-weight:900;box-shadow:0 8px 22px rgba(7,95,201,.25)}.brand b{font-size:18px}.brand small{display:block;color:var(--muted);font-size:10px;margin-top:2px}.top-actions{display:flex;gap:8px;align-items:center}.pill,.iconbtn,.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:11px;padding:10px 13px;font-weight:800}.btn{background:var(--p);border-color:var(--p);color:#fff}.btn.secondary{background:var(--sky);color:var(--p);border-color:#cfe2fa}.btn.dark{background:var(--p2);border-color:var(--p2)}.btn.large{padding:14px 20px;border-radius:13px}.iconbtn{width:42px;height:42px;padding:0}.layout{display:grid;grid-template-columns:240px 1fr;max-width:1500px;margin:auto}.sidebar{min-height:calc(100vh - 72px);border-left:1px solid var(--line);background:#fff;padding:18px 13px;position:sticky;top:72px;height:calc(100vh - 72px)}[dir=ltr] .sidebar{border-left:0;border-right:1px solid var(--line)}.role{background:var(--sky);border:1px solid #d4e5fa;border-radius:13px;padding:11px;margin:0 2px 14px;color:var(--p);font-size:12px;font-weight:900}.nav{display:grid;gap:4px}.nav button{border:0;background:transparent;color:var(--muted);padding:12px;border-radius:11px;text-align:right;font-weight:800;display:flex;gap:10px;align-items:center}.nav button.active{background:var(--sky);color:var(--p)}.content{padding:24px;max-width:1250px;width:100%;margin:auto}.hero{border-radius:24px;background:linear-gradient(115deg,#073b82,#0b73d9 65%,#168bf3);color:#fff;padding:30px;display:flex;justify-content:space-between;gap:20px;overflow:hidden;position:relative}.hero:after{content:"";position:absolute;width:320px;height:320px;border:55px solid rgba(255,255,255,.07);border-radius:50%;left:-90px;bottom:-180px}.hero h1{font-size:31px;margin:0 0 8px}.hero p{margin:0;color:#dbeaff;line-height:1.8}.hero-actions{display:flex;gap:9px;align-items:flex-end;position:relative;z-index:1}.hero .btn{background:#fff;color:var(--p);border-color:#fff}.section{margin-top:24px}.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.section-head h2{font-size:19px;margin:0}.muted{color:var(--muted);font-size:12px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.card{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:17px;box-shadow:var(--shadow)}.stat .value{font-size:25px;font-weight:950;margin:7px 0}.stat .trend{font-size:11px;color:var(--ok);font-weight:800}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.product{overflow:hidden;padding:0}.product-img{height:145px;background:linear-gradient(135deg,#edf6ff,#d9eaff);display:grid;place-items:center;font-size:58px}.product-body{padding:15px}.product h3{margin:0 0 5px;font-size:15px}.price{font-size:19px;font-weight:950;color:var(--p);margin:9px 0}.row{display:flex;align-items:center;gap:9px}.between{justify-content:space-between}.tag{display:inline-flex;padding:5px 9px;border-radius:999px;font-size:10.5px;font-weight:900}.tag.blue{background:var(--sky);color:var(--p)}.tag.ok{background:#e8f8f1;color:var(--ok)}.tag.warn{background:#fff4df;color:var(--warn)}.tag.red{background:#ffebeb;color:var(--danger)}.deal-card{display:grid;grid-template-columns:1.4fr .8fr;gap:20px}.timeline{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin-top:18px}.tl{text-align:center;font-size:9px;color:var(--muted)}.tl i{display:block;height:7px;border-radius:99px;background:var(--line);margin-bottom:6px}.tl.done{color:var(--p);font-weight:900}.tl.done i{background:linear-gradient(90deg,var(--p),#168bf3)}.money{background:var(--sky);border:1px solid #d4e5fa;border-radius:15px;padding:15px}.money strong{font-size:25px}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{padding:12px 9px;border-bottom:1px solid var(--line);text-align:right}.table th{font-size:10px;color:var(--muted);background:var(--sky)}.chat{display:grid;grid-template-columns:285px 1fr;gap:14px;min-height:620px}.rooms,.chatbox{background:#fff;border:1px solid var(--line);border-radius:17px;overflow:hidden}.room{padding:14px;border-bottom:1px solid var(--line);display:flex;gap:10px;cursor:pointer}.room.active{background:var(--sky);border-right:3px solid var(--p)}.avatar{width:40px;height:40px;border-radius:50%;background:#dcecff;color:var(--p);display:grid;place-items:center;font-weight:950}.chat-head{padding:13px 15px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.messages{height:470px;overflow:auto;background:#f7faff;padding:17px}.bubble{max-width:72%;padding:10px 12px;border-radius:14px;margin:7px 0;line-height:1.65;font-size:13px}.bubble.me{background:var(--p);color:#fff;margin-right:auto;border-bottom-right-radius:4px}.bubble.them{background:#fff;border:1px solid var(--line);margin-left:auto;border-bottom-left-radius:4px}.compose{padding:10px;border-top:1px solid var(--line);display:flex;gap:8px}.compose textarea{flex:1;resize:none;border:1px solid var(--line);border-radius:12px;padding:10px}.call{min-width:46px;background:#e8f8f1;color:var(--ok);border:1px solid #c7ebdc;border-radius:12px;font-size:20px}.modal{position:fixed;inset:0;background:rgba(7,30,62,.65);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}.modal.show{display:flex}.modalbox{width:min(720px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:20px;padding:22px}.field{margin:11px 0}.field label{display:block;font-size:11px;color:var(--muted);font-weight:900;margin-bottom:6px}.input,.textarea{width:100%;border:1px solid var(--line);border-radius:11px;padding:11px;background:#fff;outline:none}.input:focus,.textarea:focus{border-color:var(--p)}.empty{padding:30px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:14px;background:var(--sky)}
+.auth{min-height:100vh;display:grid;grid-template-columns:1.15fr .85fr}.auth-left{background:linear-gradient(135deg,#073b82,#168bf3);color:#fff;padding:70px;display:flex;flex-direction:column;justify-content:center}.auth-left h1{font-size:52px;margin:0 0 12px}.auth-left p{max-width:600px;line-height:1.9;color:#dcecff}.auth-right{display:flex;align-items:center;justify-content:center;padding:30px}.authbox{width:min(460px,100%)}.roles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}.roles button{padding:12px;border:1px solid var(--line);border-radius:11px;background:#fff;font-weight:900}.roles button.on{border-color:var(--p);background:var(--sky);color:var(--p)}.otp{display:grid;grid-template-columns:repeat(6,1fr);gap:7px}.otp input{text-align:center;padding:12px;border:1px solid var(--line);border-radius:10px;font-size:20px;font-weight:900}.mobile-nav{display:none}
+@media(max-width:1050px){.layout{grid-template-columns:76px}.sidebar{padding:14px 8px}.brandtext,.role span,.nav label{display:none}.nav button{justify-content:center}.stats,.grid4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:720px){.topbar{padding:0 13px}.layout{display:block}.sidebar{display:none}.content{padding:14px 12px 82px}.hero{padding:22px;display:block}.hero h1{font-size:25px}.hero-actions{margin-top:18px}.stats,.grid4{grid-template-columns:1fr 1fr}.deal-card{grid-template-columns:1fr}.timeline{grid-template-columns:repeat(5,1fr);row-gap:12px}.chat{grid-template-columns:1fr}.rooms{max-height:180px;overflow:auto}.auth{grid-template-columns:1fr}.auth-left{display:none}.auth-right{padding:18px}.mobile-nav{display:flex;position:fixed;bottom:0;right:0;left:0;height:64px;background:#fff;border-top:1px solid var(--line);z-index:30}.mobile-nav button{flex:1;border:0;background:none;font-size:10px;color:var(--muted)}.mobile-nav button.active{color:var(--p);font-weight:900}.brand small{display:none}.top-actions .pill{display:none}}
 </style>
 </head>
 <body>
-<div id="app"></div>
-<div class="toast" id="toast"></div>
-<div class="modal" id="modal"><div class="modalBox"><div class="modalHead"><h2 id="modalTitle"></h2><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
-
+<div id="root"></div>
+<div id="modal" class="modal"><div class="modalbox"><div class="row between"><h2 id="mtitle" style="margin:0"></h2><button class="iconbtn" onclick="closeModal()">×</button></div><div id="mbody" style="margin-top:15px"></div></div></div>
 <script>
-'use strict';
-const I18N = {
-  ar: { app_name:'وسيط', tagline:'Trade · Logistics · Trust', login:'تسجيل الدخول', login_sub:'اختر الدور ثم OTP: 123456', send_otp:'إرسال OTP', verify:'تحقق ودخول', role_trader:'تاجر ومورد', role_driver:'السائق', role_admin:'الإدارة', buy:'🛒 أشتري', sell:'📦 أبيع', nav_home:'الرئيسية', nav_market:'السوق', nav_requests:'طلباتي', nav_deals:'الصفقات', nav_chat:'الدردشة', nav_notif:'الإشعارات', nav_settings:'الإعدادات', home_hero_buy:'اشترِ بثقة.. وبِع بذكاء', home_hero_sell:'أدر مبيعاتك.. ونمِّ أرباحك', send:'إرسال', view:'عرض', open:'فتح', logout:'تسجيل الخروج' },
-  en: { app_name:'Waseet', tagline:'Trade · Logistics · Trust', login:'Sign in', login_sub:'Choose role, OTP: 123456', send_otp:'Send OTP', verify:'Verify', role_trader:'Trader', role_driver:'Driver', role_admin:'Admin', buy:'🛒 Buy', sell:'📦 Sell', nav_home:'Home', nav_market:'Market', nav_requests:'Requests', nav_deals:'Deals', nav_chat:'Chat', nav_notif:'Notifications', nav_settings:'Settings', home_hero_buy:'Buy with confidence', home_hero_sell:'Manage your sales', send:'Send', view:'View', open:'Open', logout:'Sign out' }
-};
-let LANG = 'ar', THEME = 'light';
-const t = k => I18N[LANG]?.[k] || I18N.ar[k] || k;
-const $$ = id => document.getElementById(id);
-const store = { get:(k,f)=> { try{ const v=localStorage.getItem(k); return v?JSON.parse(v):f }catch{return f} }, set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}} };
-const state = { page:'onboarding', onbIdx:0, role:null, user:null, auth:null, tradeMode:'buy', chatRoom:'supplier', dealStep:2, messages:{supplier:[],driver:[],admin:[]} };
-const DEMO_USERS = { trader:{name:'خالد أحمد — الأفق للتجارة', phone:'0550000001', otp:'123456'}, driver:{name:'أحمد — السائق', phone:'0550000003', otp:'123456'}, admin:{name:'إدارة وسيط', phone:'0550000004', otp:'123456'} };
-const ROLES = ['trader','driver','admin'];
-const DEAL_STEPS = ['طلب جديد','تفاوض','اتفاق معتمد','بانتظار الدفع','الدفع قيد التحقق','تم الدفع','قيد التحميل','تم التحميل','قيد النقل','وصل','قيد الفحص','تم الاستلام','تم تحرير المبلغ','مكتملة'];
-const DEAL_MILESTONES = ['طلب','تفاوض','اعتماد','دفع','تحميل','نقل','وصول','فحص','استلام','تسوية','إغلاق'];
-
-function applyTheme() {
-  document.documentElement.setAttribute('data-theme', THEME);
-  document.documentElement.setAttribute('dir', LANG==='ar'?'rtl':'ltr');
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const app={role:"merchant",page:"home",chat:"supplier",deal:4,logged:false,messages:{supplier:[],driver:[],admin:[]}};
+const roles={merchant:"التاجر",supplier:"المورد",driver:"السائق",admin:"الإدارة"};
+const stages=["طلب شراء","عروض الموردين","تفاوض","اتفاق","الدفع الضامن","التحميل","السائق","النقل","الوصول","الفحص","الاستلام","التسوية","الإغلاق"];
+const products=[["أرز بسمتي فاخر","1,180","500 طن","🌾","شركة الخليج"],["سكر أبيض ICUMSA","1,200","300 طن","◻️","شركة النخبة"],["زيت دوار الشمس","1,160","200 كرتون","🫗","تك تريد"],["تمور سكري","1,600","120 كرتون","🌴","مزارع الوادي"]];
+function modal(t,b){$("#mtitle").textContent=t;$("#mbody").innerHTML=b;$("#modal").classList.add("show")}
+function closeModal(){$("#modal").classList.remove("show")}
+function toast(x){modal("وسيط",'<div class="empty">'+x+"</div>")}
+function login(){
+ $("#root").innerHTML='<div class="auth"><section class="auth-left"><div class="logo" style="margin-bottom:18px">و</div><h1>وسيط</h1><p>Waseet B2B Trade & Logistics<br>من المنتج إلى بابك.. كل خطوة في منصة واحدة.</p><div style="margin-top:25px;display:flex;gap:8px;flex-wrap:wrap"><span class="tag" style="background:rgba(255,255,255,.14);color:#fff">تجارة B2B</span><span class="tag" style="background:rgba(255,255,255,.14);color:#fff">دفع ضامن</span><span class="tag" style="background:rgba(255,255,255,.14);color:#fff">لوجستيات</span><span class="tag" style="background:rgba(255,255,255,.14);color:#fff">حماية الأطراف</span></div></section><section class="auth-right"><div class="authbox"><div style="text-align:center"><div class="logo" style="margin:auto">و</div><h2>ابدأ مع وسيط</h2><p class="muted">اختر نوع الحساب للدخول إلى مساحة العمل</p></div><div class="roles">'+Object.entries(roles).map(([k,v])=>'<button class="'+(app.role===k?"on":"")+'" onclick="app.role=\''+k+'\';login()">'+v+"</button>").join("")+'</div><div class="field"><label>رقم الجوال</label><input class="input" value="05XXXXXXXX" inputmode="tel"></div><button class="btn large" style="width:100%" onclick="sendOtp()">إرسال رمز التحقق</button><p class="muted" style="text-align:center;margin-top:14px">تجربة المتصفح: رمز OTP هو 123456</p></div></section></div>'
 }
-function toast(t) { const e=$$('toast'); if(!e) return; e.textContent=t; e.style.display='block'; clearTimeout(window.__t); window.__t=setTimeout(()=>e.style.display='none', 2500); }
-function openModal(title, body) { $$('modalTitle').textContent = title; $$('modalBody').innerHTML = body; $$('modal').classList.add('show'); }
-function closeModal() { $$('modal').classList.remove('show'); }
-
-function renderOnb() {
-  const items = [
-    { i:'🌙', t:'وضع ليلي كامل', d:'تبديل فوري' },
-    { i:'📴', t:'يعمل بدون إنترنت', d:'PWA + Offline' },
-    { i:'🔐', t:'تشفير E2EE', d:'رسائل آمنة' }
-  ];
-  const o = items[state.onbIdx];
-  return `<div style="min-height:100vh;display:grid;place-items:center;background:linear-gradient(135deg,#123b7a,#1680ed);padding:20px;color:#fff">
-    <div style="max-width:420px;text-align:center;width:100%">
-      <div style="font-size:13px;font-weight:800;opacity:.9">WASEET v12</div>
-      <h1 style="font-size:44px;margin:6px 0 10px">${t('app_name')}</h1>
-      <p style="color:#d8e8ff;margin-bottom:30px">${t('tagline')}</p>
-      <div style="width:140px;height:140px;border-radius:32px;background:rgba(255,255,255,.15);display:grid;place-items:center;font-size:64px;margin:0 auto 18px">${o.i}</div>
-      <h2 style="font-size:22px;margin:0 0 8px">${o.t}</h2>
-      <p style="color:#d8e8ff">${o.d}</p>
-      <div style="display:flex;gap:6px;justify-content:center;margin:20px 0">
-        ${items.map((_,i)=>`<span style="width:${i===state.onbIdx?'20px':'8px'};height:8px;border-radius:99px;background:${i===state.onbIdx?'#fff':'rgba(255,255,255,.4)'}"></span>`).join('')}
-      </div>
-      <button class="btn" style="width:100%;background:#fff;color:#075fc9;padding:14px" onclick="onbNext()">${state.onbIdx<2?'التالي':'ابدأ الآن 🚀'}</button>
-      <div style="margin-top:16px"><span style="color:#d8e8ff;cursor:pointer" onclick="state.page='login';render()">${t('login')}</span></div>
-    </div></div>`;
-}
-function onbNext() { if(state.onbIdx<2){state.onbIdx++;render()} else {state.page='login';render()} }
-
-let loginRole='trader', otpSent=false;
-function renderAuth() {
-  return `<div class="auth">
-    <section class="authHero">
-      <h1>${t('app_name')}</h1>
-      <p>${t('tagline')}</p>
-    </section>
-    <section class="authForm"><div class="authBox">
-      <div style="text-align:center">
-        <h2>${t('login')}</h2>
-        <p class="muted">${t('login_sub')}</p>
-      </div>
-      <div class="roleGrid">${ROLES.map(r=>`<button class="role ${loginRole===r?'on':''}" onclick="pickRole('${r}')">${t('role_'+r)}</button>`).join('')}</div>
-      <div class="field"><label>الجوال</label><input class="input" value="${DEMO_USERS[loginRole].phone}" readonly></div>
-      <button class="btn ghost" style="width:100%;margin-top:10px" onclick="sendOtp()">${t('send_otp')}</button>
-      ${otpSent?`<div style="margin-top:14px">
-        <label style="display:block;font-size:11px;color:var(--muted);font-weight:800;margin-bottom:6px">OTP: 123456</label>
-        <div class="otp">${[0,1,2,3,4,5].map(i=>`<input maxlength="1" inputmode="numeric" id="o${i}" oninput="otpNext(${i})">`).join('')}</div>
-        <button class="btn" style="width:100%;margin-top:12px" onclick="verifyOtp()">${t('verify')}</button>
-      </div>`:''}
-    </div></section></div>`;
-}
-function pickRole(r){loginRole=r;otpSent=false;render()}
-function sendOtp(){otpSent=true;render();toast('OTP: 123456')}
-function otpNext(i){const n=$$('o'+i);if(n&&n.value&&i<5)$$('o'+(i+1)).focus()}
-function verifyOtp(){let c='';for(let i=0;i<6;i++)c+=$$('o'+i)?.value||'';if(c!==DEMO_USERS[loginRole].otp){toast('⛔');return}state.auth=true;state.role=loginRole;state.user=DEMO_USERS[loginRole];state.page='home';render()}
-function setLang(l){LANG=l;store.set('lang',l);applyTheme();render()}
-function toggleTheme(){THEME=THEME==='light'?'dark':'light';store.set('theme',THEME);applyTheme();render()}
-function clearSession(){state.auth=null;state.role=null;state.user=null;state.page='onboarding';render()}
-
-function icon(p){return {home:'⌂',market:'▦',requests:'＋',deals:'◫',chat:'◉',notif:'🔔',settings:'⚙'}[p]||'•'}
-function pageTitle(p){return {home:'منصة وسيط',market:'السوق',requests:'طلباتي',deals:'الصفقات',chat:'الدردشة',notif:'الإشعارات',settings:'الإعدادات'}[p]||'وسيط'}
-function navItems(){
-  if(state.role==='trader'){
-    if(state.tradeMode==='buy') return [['home','الرئيسية'],['market','السوق'],['requests','طلباتي'],['deals','الصفقات'],['chat','الدردشة'],['notif','الإشعارات'],['settings','الإعدادات']];
-    return [['home','الرئيسية'],['deals','الصفقات'],['chat','الدردشة'],['notif','الإشعارات'],['settings','الإعدادات']];
-  }
-  if(state.role==='driver') return [['home','المهمة'],['deals','الشحنات'],['chat','الدردشة'],['settings','الإعدادات']];
-  return [['home','لوحة الإدارة'],['deals','الصفقات'],['chat','الدردشة'],['notif','الإشعارات'],['settings','الإعدادات']];
-}
-function nav(p){state.page=p;render();window.scrollTo({top:0,behavior:'smooth'})}
-function toggleSide(){document.querySelector('.side')?.classList.toggle('open')}
+function sendOtp(){modal("التحقق من الجوال",'<p class="muted">أدخل رمز التحقق المكوّن من 6 أرقام.</p><div class="otp">'+[0,1,2,3,4,5].map(i=>'<input id="o'+i+'" maxlength="1" inputmode="numeric" oninput="nextOtp('+i+')">').join("")+'</div><button class="btn" style="width:100%;margin-top:14px" onclick="verify()">تحقق ودخول</button>')}
+function nextOtp(i){if($("#o"+i)?.value&&i<5)$("#o"+(i+1)).focus()}
+function verify(){let x="";for(let i=0;i<6;i++)x+=$("#o"+i)?.value||"";if(x!=="123456"){toast("رمز التحقق غير صحيح");return}app.logged=true;closeModal();render()}
+function nav(p){app.page=p;render();scrollTo(0,0)}
 function shell(){
-  const navs = navItems();
-  return `<div class="app">
-    <aside class="side">
-      <div class="brand"><div class="brandMark">و</div><div class="brandText"><b>${t('app_name')}</b><small>Waseet v12</small></div></div>
-      <div class="roleBadge">${t('role_'+state.role)}</div>
-      <div class="nav">${navs.map(([p,l])=>`<button class="${state.page===p?'active':''}" onclick="nav('${p}')">${icon(p)} <span>${l}</span></button>`).join('')}</div>
-      <div style="position:absolute;bottom:18px;left:14px;right:14px"><button class="btn ghost" style="width:100%" onclick="clearSession()">${t('logout')}</button></div>
-    </aside>
-    <main class="main">
-      <header class="top">
-        <div class="row"><button class="burger" onclick="toggleSide()">☰</button>
-          <div><b style="font-size:19px">${pageTitle(state.page)}</b><div style="font-size:11px;color:var(--muted);margin-top:2px">${state.user.name}</div></div>
-        </div>
-        <div class="user">
-          ${state.role==='trader'?`<div class="modeSwitch">
-            <button class="${state.tradeMode==='buy'?'on':''}" onclick="setMode('buy')">${t('buy')}</button>
-            <button class="${state.tradeMode==='sell'?'on':''}" onclick="setMode('sell')">${t('sell')}</button>
-          </div>`:''}
-          <div class="langSwitch">
-            <button class="${LANG==='ar'?'on':''}" onclick="setLang('ar')">🇸🇦</button>
-            <button class="${LANG==='en'?'on':''}" onclick="setLang('en')">🇬🇧</button>
-          </div>
-          <button class="voiceBtn" onclick="toggleTheme()">${THEME==='dark'?'☀️':'🌙'}</button>
-          <div class="avatar">${state.user.name[0]}</div>
-        </div>
-      </header>
-      <div class="wrap" id="view"></div>
-    </main>
-    <div class="navbar">${navItems().slice(0,5).map(([p,l])=>`<button class="${state.page===p?'active':''}" onclick="nav('${p}')"><span class="ico">${icon(p)}</span>${l}</button>`).join('')}</div>
-  </div>`;
+const navs=app.role==="merchant"?[["home","⌂","الرئيسية"],["market","▦","السوق"],["requests","＋","الطلبات"],["deals","◫","الصفقات"],["chat","◉","المحادثات"]]:app.role==="supplier"?[["home","⌂","الرئيسية"],["requests","＋","طلبات الشراء"],["deals","◫","الصفقات"],["chat","◉","المحادثات"]]:app.role==="driver"?[["home","⌂","المهمة الحالية"],["deals","◫","الشحنات"],["chat","◉","المحادثات"]]:[["home","⌂","لوحة الإدارة"],["deals","◫","الصفقات"],["chat","◉","المحادثات"]];
+return '<div class="app"><header class="topbar"><div class="brand"><div class="logo">و</div><div><b>وسيط</b><small>Waseet B2B Trade & Logistics</small></div></div><div class="top-actions"><span class="pill">'+roles[app.role]+'</span><button class="iconbtn" onclick="toast(\'الإشعارات محفوظة للنسخة المتصلة\')">🔔</button><button class="iconbtn" onclick="app.logged=false;login()">↪</button></div></header><div class="layout"><aside class="sidebar"><div class="role">'+roles[app.role]+' <span>· مساحة عمل</span></div><nav class="nav">'+navs.map(n=>'<button class="'+(app.page===n[0]?"active":"")+'" onclick="nav(\''+n[0]+'\')"><b>'+n[1]+'</b><label>'+n[2]+"</label></button>").join("")+'</nav></aside><main class="content" id="content"></main></div><nav class="mobile-nav">'+navs.slice(0,5).map(n=>'<button class="'+(app.page===n[0]?"active":"")+'" onclick="nav(\''+n[0]+'\')"><div style="font-size:18px">'+n[1]+"</div>"+n[2]+"</button>").join("")+"</nav></div>"
 }
-function setMode(m){state.tradeMode=m;state.page='home';render()}
-function stepper(){return `<div class="stepper">${DEAL_MILESTONES.map((x,i)=>`<div class="st ${i<=state.dealStep?'done':''}"><div class="bar"></div>${x}</div>`).join('')}</div>`}
-
-function home(v){
-  const isBuy = state.tradeMode==='buy';
-  v.innerHTML = `
-    <section class="hero">
-      <div><h1>${isBuy?t('home_hero_buy'):t('home_hero_sell')}</h1>
-        <p>${isBuy?'تصفح آلاف المنتجات':'اعرض منتجاتك لآلاف التجار'}</p>
-      </div>
-    </section>
-    <div class="grid mt">
-      <div class="card stat"><div class="muted">${isBuy?'مشترياتي':'مبيعاتي'}</div><div class="n">${isBuy?'540,000':'664,000'}</div><div class="muted">ر.س</div></div>
-      <div class="card stat"><div class="muted">الصفقات</div><div class="n">2</div></div>
-      <div class="card stat"><div class="muted">الطلبات</div><div class="n">${isBuy?'24':'18'}</div></div>
-      <div class="card stat"><div class="muted">التقييم</div><div class="n">4.8 ★</div></div>
-    </div>
-    <div class="sectionTitle">📋 الصفقة الحالية</div>
-    <div class="card">
-      <div class="row space" style="align-items:flex-start;margin-bottom:12px">
-        <div><span class="tag blue">${DEAL_STEPS[state.dealStep]}</span><h2 style="margin-top:8px">#WST-000125 · أرز بسمتي</h2></div>
-        <button class="btn soft" onclick="nav('deals')">${t('open')}</button>
-      </div>
-      ${stepper()}
-    </div>
-    <div class="sectionTitle">⚡ إجراءات سريعة</div>
-    <div class="grid">
-      <div class="card" style="cursor:pointer" onclick="nav('chat')"><b>💬 الدردشة</b></div>
-      <div class="card" style="cursor:pointer" onclick="toast('Escrow')"><b>🛡️ Escrow</b></div>
-      <div class="card" style="cursor:pointer" onclick="toast('Invoice')"><b>🧾 فاتورة</b></div>
-      <div class="card" style="cursor:pointer" onclick="toast('العقود')"><b>📄 العقود</b></div>
-    </div>`;
+function home(){
+const role=roles[app.role];
+if(app.role==="driver")return '<div class="hero"><div><h1>مهمة الشحن الحالية</h1><p>استلام شحنة أرز بسمتي من المورد وتسليمها للتاجر.</p></div><div class="hero-actions"><button class="btn" onclick="advance()">تحديث الحالة</button></div></div>'+dealBlock();
+if(app.role==="admin")return '<div class="hero"><div><h1>لوحة حماية وسيط</h1><p>متابعة الصفقات، المدفوعات، التحميل، النقل، الفحص والنزاعات من مكان واحد.</p></div></div><div class="stats section">'+[['صفقات نشطة','18'],['مدفوعات قيد التحقق','6'],['شحنات بالنقل','9'],['نزاعات مفتوحة','2']].map(x=>'<div class="card stat"><div class="muted">'+x[0]+'</div><div class="value">'+x[1]+'</div><div class="trend">تحتاج متابعة</div></div>').join("")+'</div>'+dealBlock();
+return '<div class="hero"><div><h1>'+(app.role==="merchant"?"اشترِ بثقة.. وبِع بذكاء":"أدر منتجاتك ووصل إلى التجار")+'</h1><p>من الطلب والتفاوض إلى الدفع الضامن والنقل والفحص والتسوية، كل خطوة موثقة داخل وسيط.</p></div><div class="hero-actions"><button class="btn" onclick="app.page=app.role===\'merchant\'?\'market\':\'requests\';render()">'+(app.role==="merchant"?"تصفح السوق":"عرض طلبات الشراء")+"</button></div></div>"+statsBlock()+dealBlock()+(app.role==="merchant"?marketBlock():"");
 }
-function market(v){
-  const p=[['أرز بسمتي','1,180 ر.س','500 طن','🌾','شركة الخليج','4.8'],['سكر أبيض','1,200 ر.س','300 طن','⬜','شركة النخبة','4.7'],['زيت دوار الشمس','1,160 ر.س','200 كرتون','🫗','تك تريد','4.9'],['تمور سكري','1,600 ر.س','120 كرتون','🌴','مزارع الوادي','4.8']];
-  v.innerHTML=`<input class="input" placeholder="🔍 ابحث..." style="margin-bottom:12px;max-width:400px">
-    <div class="products">${p.map(x=>`<article class="card" style="margin:0">
-      <div class="prodPic">${x[3]}</div>
-      <h3 style="margin:9px 0 4px">${x[0]}</h3>
-      <div class="muted">${x[4]} · ${x[5]} ★ · ${x[2]}</div>
-      <div class="price">${x[1]}</div>
-      <div class="row" style="gap:7px"><button class="btn" style="flex:1" onclick="toast('${x[0]}')">${t('view')}</button><button class="btn soft" style="flex:1" onclick="nav('chat')">💬</button></div>
-    </article>`).join('')}</div>`;
-}
-function requests(v){v.innerHTML=`<div class="card"><h3>طلباتي</h3><table class="table mt"><tr><th>المنتج</th><th>الكمية</th><th>الحالة</th></tr><tr><td>خوذ سلامة</td><td>500</td><td><span class="tag amber">مراجعة</span></td></tr><tr><td>ألواح شمسية</td><td>200</td><td><span class="tag green">✓</span></td></tr></table></div>`}
-function deals(v){
-  v.innerHTML=`<div class="card">
-    <div class="row space" style="align-items:flex-start;margin-bottom:12px">
-      <div><span class="tag blue">${DEAL_STEPS[state.dealStep]}</span><h2 style="margin-top:9px">#WST-000125</h2></div>
-      <span class="tag green">🛡️ Escrow</span>
-    </div>
-    <div class="kv">
-      <div class="cell"><span class="muted">البضاعة</span><b>590,000 ر.س</b></div>
-      <div class="cell"><span class="muted">الشحن</span><b>20,000 ر.س</b></div>
-      <div class="cell"><span class="muted">الإجمالي</span><b>610,000 ر.س</b></div>
-      <div class="cell"><span class="muted">الدفع</span><b>غير مدفوع</b></div>
-    </div>
-    ${stepper()}
-  </div>
-  <button class="btn" style="width:100%" onclick="advanceDeal()">الخطوة التالية ←</button>`;
-}
-function advanceDeal(){if(state.dealStep>=DEAL_STEPS.length-1){toast('مكتملة');return}state.dealStep++;toast('→ '+DEAL_STEPS[state.dealStep]);render()}
-function chat(v){
-  const rooms=[['supplier','شركة الخليج','تفاوض'],['driver','أحمد — السائق','مهمة'],['admin','إدارة وسيط','حماية']];
-  const active = rooms.find(r=>r[0]===state.chatRoom)||rooms[0];
-  v.innerHTML=`<div class="chatLayout">
-    <div class="rooms">${rooms.map(r=>`<div class="room ${state.chatRoom===r[0]?'active':''}" onclick="state.chatRoom='${r[0]}';chat($$('view'))">
-      <div class="avatar">${r[1][0]}</div><div><b style="font-size:13px">${r[1]}</b><div class="muted">${r[2]}</div></div>
-    </div>`).join('')}</div>
-    <div class="chatMain">
-      <div class="chatHead">
-        <div class="chatIdentity"><div class="avatar">${active[1][0]}</div><div><b>${active[1]}</b><div class="muted">● online</div></div></div>
-        <button class="btn soft" onclick="toast('☎ مكالمة')">☎</button>
-      </div>
-      <div class="messages" id="messages">
-        ${state.messages[state.chatRoom].length ? state.messages[state.chatRoom].map(m=>`<div class="bubble ${m.from==='me'?'me':'them'}">${m.text}</div>`).join('') : '<div class="empty"><div class="icon">💬</div>لا توجد رسائل</div>'}
-      </div>
-      <div class="compose">
-        <textarea id="msg" class="textarea" rows="2" placeholder="اكتب..."></textarea>
-        <button class="btn" onclick="sendMessage()">${t('send')}</button>
-      </div>
-    </div>
-  </div>`;
-  const box = $$('messages'); if(box) box.scrollTop = box.scrollHeight;
-}
-function sendMessage(){const x=$$('msg');const txt=x?.value?.trim();if(!txt)return;state.messages[state.chatRoom].push({from:'me',text:txt});x.value='';chat($$('view'))}
-function notif(v){v.innerHTML=`<div class="card"><h3>🔔 الإشعارات</h3><div class="empty"><div class="icon">🔔</div>لا توجد إشعارات</div></div>`}
-function settings(v){
-  v.innerHTML=`<div class="sectionTitle">🎨 المظهر</div>
-    <div class="card"><div class="row space"><span>${THEME==='dark'?'داكن':'فاتح'}</span><button class="btn soft" onclick="toggleTheme()">${THEME==='dark'?'☀️':'🌙'}</button></div></div>
-    <div class="sectionTitle">🌍 اللغة</div>
-    <div class="card"><div class="row space"><span>${LANG==='ar'?'العربية':'English'}</span><div class="langSwitch">
-      <button class="${LANG==='ar'?'on':''}" onclick="setLang('ar')">AR</button>
-      <button class="${LANG==='en'?'on':''}" onclick="setLang('en')">EN</button>
-    </div></div></div>
-    <div class="sectionTitle">📱 التطبيق</div>
-    <div class="card"><div><b>الإصدار:</b> v12.0.0</div><div style="margin-top:8px"><b>الوضع:</b> PWA/APK</div></div>
-    <div class="card" style="text-align:center"><button class="btn ghost" onclick="resetAll()">🔄 إعادة تعيين</button></div>`;
-}
-function resetAll(){if(!confirm('حذف كل البيانات؟'))return;localStorage.clear();location.reload()}
-
-function render(){
-  if(!state.auth){$$('app').innerHTML=state.page==='onboarding'?renderOnb():renderAuth();return}
-  $$('app').innerHTML=shell();
-  const v=$$('view');
-  const pages={home,market,requests,deals,chat,notif,settings};
-  (pages[state.page]||home)(v);
-}
-
-(function boot(){
-  LANG = store.get('lang','ar');
-  THEME = store.get('theme','light');
-  applyTheme();
-  if('serviceWorker' in navigator && location.protocol!=='file:'){
-    navigator.serviceWorker.register('./sw.js').catch(()=>{});
-  }
-  render();
-})();
+function statsBlock(){return '<div class="stats section">'+[['إجمالي قيمة الصفقات','610,000 ر.س'],['الصفقات النشطة','8'],['الطلبات المفتوحة','24'],['الرصيد الضامن','0 ر.س']].map(x=>'<div class="card stat"><div class="muted">'+x[0]+'</div><div class="value">'+x[1]+'</div><div class="trend">● محدث الآن</div></div>').join("")+"</div>"}
+function marketBlock(){return '<div class="section"><div class="section-head"><h2>منتجات مقترحة</h2><button class="btn secondary" onclick="nav(\'market\')">كل السوق</button></div><div class="grid4">'+products.slice(0,4).map(productCard).join("")+"</div></div>"}
+function productCard(p){return '<article class="card product"><div class="product-img">'+p[3]+'</div><div class="product-body"><h3>'+p[0]+'</h3><div class="muted">'+p[4]+' · '+p[2]+'</div><div class="price">'+p[1]+' ر.س</div><div class="row"><button class="btn" style="flex:1" onclick="openProduct(\''+p[0]+'\')">طلب عرض</button><button class="btn secondary" onclick="app.page=\'chat\';app.chat=\'supplier\';render()">💬</button></div></div></article>"}
+function openProduct(name){modal(name,'<div class="money"><div class="muted">سعر المورد المبدئي</div><strong>1,180 ر.س</strong><div class="muted" style="margin-top:7px">الكمية المتاحة: 500 طن</div></div><div class="field"><label>الكمية المطلوبة</label><input class="input" value="100"></div><div class="field"><label>ملاحظات ومواصفات</label><textarea class="textarea" rows="3" placeholder="المواصفات، بلد المنشأ، موعد التسليم..."></textarea></div><button class="btn" style="width:100%" onclick="closeModal();app.page=\'chat\';render()">بدء التفاوض مع المورد</button>')}
+function dealBlock(){return '<div class="section"><div class="section-head"><h2>الصفقة #WST-000125</h2><span class="tag blue">'+stages[app.deal]+'</span></div><div class="card deal-card"><div><div class="row between"><div><b>أرز بسمتي فاخر</b><div class="muted" style="margin-top:4px">التاجر: الأفق للتجارة · المورد: شركة الخليج</div></div><span class="tag ok">🛡 الدفع الضامن</span></div><div class="timeline">'+stages.slice(0,10).map((s,i)=>'<div class="tl '+(i<=app.deal?"done":"")+'"><i></i>'+s+'</div>').join("")+"</div></div><div class="money"><div class="muted">إجمالي الصفقة</div><strong>610,000 ر.س</strong><div style="margin-top:12px" class="muted">البضاعة 590,000 · الشحن 20,000</div><button class="btn" style="width:100%;margin-top:14px" onclick="advance()">"+(app.deal<stages.length-1?"تنفيذ الخطوة التالية":"الصفقة مكتملة")+"</button></div></div></div>"}
+function advance(){if(app.deal<stages.length-1)app.deal++;render()}
+function market(){ $("#content").innerHTML='<div class="section-head"><div><h2>السوق</h2><div class="muted">عروض الموردين متاحة للتجار</div></div><button class="btn" onclick="modal(\'طلب شراء جديد\',\'<div class=field><label>المنتج</label><input class=input placeholder=\'اسم المنتج\'></div><div class=field><label>الكمية</label><input class=input placeholder=\'الكمية\'></div><button class=btn style=width:100% onclick=closeModal()>نشر الطلب</button>\')">+ طلب شراء</button></div><div class="grid4">'+products.concat(products).map(productCard).join("")+"</div>"}
+function requests(){ $("#content").innerHTML='<div class="section-head"><div><h2>'+(app.role==="supplier"?"طلبات شراء التجار":"طلباتي")+'</h2><div class="muted">كل الطلبات والعروض المرتبطة بك</div></div></div><div class="card"><table class="table"><tr><th>المنتج</th><th>الكمية</th><th>الوجهة</th><th>الحالة</th><th></th></tr>'+["أرز بسمتي فاخر","سكر أبيض ICUMSA","تمور سكري","زيت دوار الشمس"].map((x,i)=>'<tr><td><b>'+x+'</b></td><td>'+[100,300,120,200][i]+' طن</td><td>جدة</td><td><span class="tag '+(i%2?"warn":"blue")+'">'+(i%2?"بانتظار العرض":"تفاوض")+'</span></td><td><button class="btn secondary" onclick="app.page=\'chat\';render()">فتح</button></td></tr>').join("")+"</table></div>"}
+function deals(){ $("#content").innerHTML='<div class="section-head"><div><h2>الصفقات</h2><div class="muted">حالة الصفقة في كل مرحلة</div></div></div>'+dealBlock()+'<div class="section card"><h3>سجل الإجراءات</h3><table class="table"><tr><th>الوقت</th><th>الإجراء</th><th>الطرف</th></tr><tr><td>10:42</td><td>تم تحديث حالة الصفقة</td><td>وسيط</td></tr><tr><td>10:15</td><td>تم رفع مستند التحميل</td><td>المورد</td></tr><tr><td>09:48</td><td>تم اعتماد العرض</td><td>التاجر</td></tr></table></div>"}
+function chat(){const rooms=[["supplier","شركة الخليج","تفاوض الصفقة #125"],["driver","أحمد — السائق","النقل"],["admin","إدارة وسيط","حماية الصفقة"]];$("#content").innerHTML='<div class="chat"><div class="rooms">'+rooms.map(r=>'<div class="room '+(app.chat===r[0]?"active":"")+'" onclick="app.chat=\''+r[0]+'\';render()"><div class="avatar">'+r[1][0]+'</div><div><b>'+r[1]+'</b><div class="muted">'+r[2]+'</div></div></div>').join("")+'</div><div class="chatbox"><div class="chat-head"><div class="row"><div class="avatar">'+rooms.find(r=>r[0]===app.chat)[1][0]+'</div><div><b>'+rooms.find(r=>r[0]===app.chat)[1]+'</b><div class="muted">● متصل · الرسائل محفوظة</div></div></div><button class="call" onclick="call()">☎</button></div><div class="messages">'+(app.messages[app.chat].length?app.messages[app.chat].map(m=>'<div class="bubble '+m.who+'">'+m.text+'</div>').join(""):'<div class="empty">لا توجد رسائل بعد<br>ابدأ التفاوض من هنا.</div>')+'</div><div class="compose"><textarea id="msg" rows="2" placeholder="اكتب رسالة..."></textarea><button class="btn" onclick="send()">إرسال</button></div></div></div>'}
+function call(){modal("مكالمة صوتية",'<div class="empty"><div style="font-size:42px">☎</div><b>اتصال بالطرف الآخر</b><p>زر الاتصال جاهز في واجهة التفاوض. ربط مزود الاتصال الحقيقي يتم في مرحلة خدمات الاتصال والإشعارات.</p></div>')}
+function send(){let x=$("#msg").value.trim();if(!x)return;app.messages[app.chat].push({who:"me",text:x});render()}
+function render(){if(!app.logged){login();return}$("#root").innerHTML=shell();if(app.page==="home")$("#content").innerHTML=home();else if(app.page==="market")market();else if(app.page==="requests")requests();else if(app.page==="deals")deals();else if(app.page==="chat")chat();else $("#content").innerHTML=home()}
+login();
 </script>
 </body>
 </html>
