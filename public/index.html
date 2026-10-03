@@ -57,8 +57,76 @@ return `<header class="top"><div class="brand"><div class="logo">و</div><div>و
 }
 function bindNav(){document.querySelectorAll("[data-nav]").forEach(b=>b.onclick=()=>nav(b.dataset.nav));el("logout").onclick=()=>{state.logged=false;login()}}
 function stats(){return `<div class="stats">${[["قيمة الصفقات","610,000 ر.س"],["الصفقات النشطة","8"],["الطلبات المفتوحة","24"],["الرصيد الضامن","0 ر.س"]].map(x=>`<div class="card"><div class="muted">${x[0]}</div><div class="value">${x[1]}</div><span class="tag">محدث الآن</span></div>`).join("")}</div>`}
-function deal(){return `<div class="section"><div class="head"><h2>الصفقة #WST-000125</h2><span class="tag">${stages[state.stage]}</span></div><div class="card deal"><div><b>أرز بسمتي فاخر</b><p class="muted">التاجر: الأفق للتجارة · المورد: شركة الخليج</p><div class="timeline">${stages.map((s,i)=>`<div class="step ${i<=state.stage?"done":""}"><i></i>${s}</div>`).join("")}</div></div><div class="money"><div class="muted">إجمالي الصفقة</div><div class="value">610,000 ر.س</div><div class="muted">البضاعة 590,000 · الشحن 20,000</div><button id="advance" class="btn" style="width:100%;margin-top:14px">${state.stage<12?"تنفيذ الخطوة التالية":"الصفقة مكتملة"}</button></div></div></div>`}
-async function bindDeal(){if(!el("advance")||!state.dealId)return;el("advance").onclick=async()=>{if(state.stage>=12)return;const map={2:"payment",4:"loading",5:"transport",8:"inspection",10:"settlement",11:"closing"};const target=map[state.stage];if(!target)return alert("هذه المرحلة تحتاج إجراءها من الطرف المختص.");const {error}=await db.rpc("advance_deal_stage",{p_deal_id:state.dealId,p_target_stage:target});if(error)return alert(error.message);await loadRemote();render()}}
+function currentDeal(){return (state.remoteDeals||[]).find(d=>d.id===state.dealId)||state.remoteDeals?.[0]||null}
+function stageIndex(s){return {negotiation:2,payment:4,loading:5,transport:7,inspection:9,settlement:11,closing:12,dispute:12}[s]??0}
+function deal(){
+const d=currentDeal(); if(!d)return '<div class="card"><h2>لا توجد صفقة نشطة</h2><p class="muted">ابدأ بطلب شراء وقبول عرض مورد.</p></div>';
+state.dealId=d.id; const idx=stageIndex(d.stage);
+return '<div class="section"><div class="head"><h2>الصفقة #'+esc(d.id.slice(0,8).toUpperCase())+'</h2><span class="tag">'+esc(d.stage)+'</span></div><div class="card deal"><div><b>صفقة تجارية موثقة</b><p class="muted">البضاعة: '+Number(d.total_goods||0).toLocaleString()+' ر.س · الشحن: '+Number(d.shipping_cost||0).toLocaleString()+' ر.س</p><div class="timeline">'+stages.map((s,i)=>'<div class="step '+(i<=idx?'done':'')+'"><i></i>'+s+'</div>').join('')+'</div></div><div class="money"><div class="muted">إجمالي الصفقة</div><div class="value">'+Number(d.total_amount||0).toLocaleString()+' ر.س</div><div id="transactionAction"></div></div></div></div><div id="transactionPanel" class="section"></div>';
+}
+async function bindDeal(){
+const d=currentDeal(); if(!d)return;
+const box=el("transactionAction"); const panel=el("transactionPanel"); if(!box||!panel)return;
+let html='';
+if(d.stage==='negotiation') html='<button id="goPayment" class="btn" style="width:100%">الانتقال إلى الدفع</button>';
+else if(d.stage==='payment') html='<button id="payBtn" class="btn" style="width:100%">إرسال إثبات التحويل</button>';
+else if(d.stage==='loading') html='<button id="shipmentBtn" class="btn" style="width:100%">بيانات التحميل والسائق</button>';
+else if(d.stage==='transport') html='<button id="transportBtn" class="btn" style="width:100%">تحديث النقل / التسليم</button>';
+else if(d.stage==='inspection') html='<button id="inspectionBtn" class="btn" style="width:100%">تسجيل نتيجة الفحص</button>';
+else if(d.stage==='settlement') html='<button id="closeBtn" class="btn" style="width:100%">تأكيد التسوية والإغلاق</button>';
+else if(d.stage==='closing') html='<span class="tag">تم إغلاق الصفقة</span>';
+else if(d.stage==='dispute') html='<span class="tag">الصفقة قيد النزاع</span>';
+box.innerHTML=html;
+panel.innerHTML='<div class="card"><div class="head"><h3>إجراءات الصفقة</h3><span class="muted">كل إجراء يسجل في سجل الصفقة</span></div><div id="actionContent"></div></div>';
+const ac=el("actionContent");
+const q=await db.from("payments").select("*").eq("deal_id",d.id).order("created_at",{ascending:false}).limit(3);
+const pay=q.data?.[0];
+if(d.stage==='payment'&&pay) ac.innerHTML='<div class="money">آخر دفعة: '+Number(pay.amount||0).toLocaleString()+' ر.س · <b>'+esc(pay.status)+'</b>'+(pay.rejection_reason?'<div class="muted">سبب الرفض: '+esc(pay.rejection_reason)+'</div>':'')+'</div>';
+if(d.stage==='loading') await renderShipmentAction(d,ac);
+if(d.stage==='transport') await renderTransportAction(d,ac);
+if(d.stage==='inspection') await renderInspectionAction(d,ac);
+if(d.stage==='settlement') await renderSettlementAction(d,ac);
+if(d.stage==='dispute') await renderDisputeAction(d,ac);
+if(el("goPayment"))el("goPayment").onclick=async()=>{const x=await db.rpc("advance_deal_stage",{p_deal_id:d.id,p_target_stage:"payment"});if(x.error)return alert(x.error.message);await loadRemote();render()};
+if(el("payBtn"))el("payBtn").onclick=()=>showPaymentForm(d);
+if(el("shipmentBtn"))el("shipmentBtn").onclick=()=>renderShipmentAction(d,ac);
+if(el("transportBtn"))el("transportBtn").onclick=()=>renderTransportAction(d,ac);
+if(el("inspectionBtn"))el("inspectionBtn").onclick=()=>renderInspectionAction(d,ac);
+if(el("closeBtn"))el("closeBtn").onclick=async()=>{const x=await db.rpc("advance_deal_stage",{p_deal_id:d.id,p_target_stage:"closing"});if(x.error)return alert(x.error.message);await loadRemote();render()};
+}
+async function showPaymentForm(d){
+const s=await db.from("admin_settings").select("*").eq("id",true).single();const a=s.data||{};
+showModal("الدفع الضامن",'<div class="money"><b>المبلغ المطلوب: '+Number(d.total_amount||0).toLocaleString()+' ر.س</b><p class="muted">اسم البنك: '+esc(a.bank_name||"يحدد من الإدارة")+'<br>اسم الحساب: '+esc(a.bank_account_name||"-")+'<br>IBAN: '+esc(a.iban||"-")+'</p></div><div class="field"><label>رقم مرجع التحويل</label><input id="payRef" class="input"></div><div class="field"><label>إرفاق إيصال التحويل</label><input id="payFile" class="input" type="file" accept=".pdf,image/*"></div><button id="submitPayment" class="btn" style="width:100%">إرسال للتحقق</button>');
+el("submitPayment").onclick=async()=>{const file=el("payFile").files[0];if(!file)return alert("أرفق إيصال التحويل");const path=state.user.id+"/"+d.id+"-"+Date.now()+"-"+file.name.replace(/[^a-zA-Z0-9._-]/g,"_");const u=await db.storage.from("payment-proofs").upload(path,file,{upsert:false});if(u.error)return alert(u.error.message);const x=await db.from("payments").insert({deal_id:d.id,amount:d.total_amount,method:"bank_transfer",status:"pending",reference:el("payRef").value.trim(),proof_url:path});if(x.error)return alert(x.error.message);el("modal").classList.remove("show");await loadRemote();render()};
+}
+async function renderShipmentAction(d,ac){
+const sh=(await db.from("shipments").select("*").eq("deal_id",d.id).maybeSingle()).data;
+let drivers=[];if(state.role==='admin'||state.role==='merchant'||state.role==='supplier')drivers=(await db.from("profiles").select("id,full_name,phone").eq("role","driver").eq("verification_status","approved")).data||[];
+ac.innerHTML=(sh?'<div class="money">السائق: '+esc(sh.driver_phone||"-")+' · المركبة: '+esc(sh.vehicle_plate||"-")+' · الحالة: '+esc(sh.status)+'</div>':'<div class="muted">لم يتم تعيين سائق بعد.</div>')+(drivers.length?'<div class="field"><label>تعيين السائق</label><select id="driverSel" class="input">'+drivers.map(x=>'<option value="'+x.id+'">'+esc(x.full_name||x.phone)+'</option>').join('')+'</select></div><button id="assignDriver" class="btn">تعيين السائق</button>':'');
+if(el("assignDriver"))el("assignDriver").onclick=async()=>{const x=await db.rpc("assign_driver",{p_deal_id:d.id,p_driver_id:el("driverSel").value});if(x.error)return alert(x.error.message);await renderShipmentAction(d,ac)};
+}
+async function renderTransportAction(d,ac){
+const sh=(await db.from("shipments").select("*").eq("deal_id",d.id).maybeSingle()).data;
+if(state.role==='supplier'||state.role==='admin')ac.innerHTML='<div class="field"><label>رقم لوحة المركبة</label><input id="plate" class="input" value="'+esc(sh?.vehicle_plate||"")+'"></div><div class="field"><label>هاتف السائق</label><input id="driverPhone" class="input" value="'+esc(sh?.driver_phone||"")+'"></div><div class="field"><label>وقت الوصول المتوقع</label><input id="eta" class="input" type="datetime-local"></div><div class="field"><label>إثبات التحميل</label><input id="loadProof" class="input" type="file" accept=".pdf,image/*"></div><button id="saveShipment" class="btn">حفظ بيانات النقل</button>';
+else ac.innerHTML='<div class="money">السائق: '+esc(sh?.driver_phone||"-")+' · اللوحة: '+esc(sh?.vehicle_plate||"-")+' · الحالة: '+esc(sh?.status||"-")+'</div>';
+if(el("saveShipment"))el("saveShipment").onclick=async()=>{let proof=sh?.loading_proof_url||null;const f=el("loadProof").files[0];if(f){const path=state.user.id+"/"+d.id+"-loading-"+Date.now()+"-"+f.name.replace(/[^a-zA-Z0-9._-]/g,"_");const u=await db.storage.from("documents").upload(path,f,{upsert:false});if(u.error)return alert(u.error.message);proof=path}const x=await db.from("shipments").upsert({deal_id:d.id,vehicle_plate:el("plate").value.trim(),driver_phone:el("driverPhone").value.trim(),expected_arrival:el("eta").value?new Date(el("eta").value).toISOString():null,loading_proof_url:proof,status:"in_transit"},{onConflict:"deal_id"});if(x.error)return alert(x.error.message);const z=await db.rpc("advance_deal_stage",{p_deal_id:d.id,p_target_stage:"transport"});if(z.error)return alert(z.error.message);await loadRemote();render()};
+}
+async function renderInspectionAction(d,ac){
+const existing=(await db.from("inspections").select("*").eq("deal_id",d.id).maybeSingle()).data;
+ac.innerHTML='<div class="field"><label>نتيجة الفحص</label><select id="inspectionResult" class="input"><option value="passed">مطابق</option><option value="failed">غير مطابق</option><option value="partial">مطابقة جزئية</option></select></div><div class="field"><label>ملاحظات</label><textarea id="inspectionNotes" class="input" rows="3">'+esc(existing?.notes||"")+'</textarea></div><button id="saveInspection" class="btn">حفظ نتيجة الفحص</button><button id="openDispute" class="btn light" style="margin-right:6px">فتح نزاع</button>';
+if(el("saveInspection"))el("saveInspection").onclick=async()=>{const r=el("inspectionResult").value,n=el("inspectionNotes").value.trim();const x=await db.from("inspections").upsert({deal_id:d.id,inspector_id:state.user.id,result:r,notes:n},{onConflict:"deal_id"});if(x.error)return alert(x.error.message);if(r==="failed")return openDispute(d);const z=await db.rpc("advance_deal_stage",{p_deal_id:d.id,p_target_stage:"settlement"});if(z.error)return alert(z.error.message);await loadRemote();render()};
+if(el("openDispute"))el("openDispute").onclick=()=>openDispute(d);
+}
+function openDispute(d){showModal("فتح نزاع",'<div class="field"><label>سبب النزاع</label><textarea id="disputeReason" class="input" rows="4"></textarea></div><button id="sendDispute" class="btn" style="width:100%">إرسال النزاع للإدارة</button>');el("sendDispute").onclick=async()=>{const reason=el("disputeReason").value.trim();if(!reason)return alert("اكتب سبب النزاع");const x=await db.rpc("open_dispute",{p_deal_id:d.id,p_reason:reason});if(x.error)return alert(x.error.message);el("modal").classList.remove("show");await loadRemote();render()};
+}
+async function renderSettlementAction(d,ac){
+const sh=(await db.from("shipments").select("*").eq("deal_id",d.id).maybeSingle()).data;
+ac.innerHTML='<div class="money">تم الوصول إلى مرحلة التسوية. '+(d.merchant_id===state.user?.id?'أكد استلام البضاعة بعد الفحص.':'بانتظار تأكيد التاجر.')+'</div>'+(d.merchant_id===state.user?.id?'<button id="receipt" class="btn" style="margin-top:10px">تأكيد الاستلام</button>':'');
+if(el("receipt"))el("receipt").onclick=async()=>{const x=await db.rpc("confirm_receipt",{p_deal_id:d.id});if(x.error)return alert(x.error.message);await loadRemote();render()};
+}
+async function renderDisputeAction(d,ac){
+if(state.role==='admin'){const ds=(await db.from("disputes").select("*").eq("deal_id",d.id).order("created_at",{ascending:false}).limit(1)).data?.[0];ac.innerHTML=ds?'<div class="money"><b>سبب النزاع:</b> '+esc(ds.reason)+'<p>'+esc(ds.resolution||"بانتظار قرار الإدارة")+'</p></div><textarea id="resolution" class="input" rows="3" placeholder="قرار الإدارة"></textarea><button id="resolve" class="btn" style="margin-top:8px">اعتماد القرار</button>':'<div class="muted">لا يوجد سجل نزاع.</div>';if(el("resolve"))el("resolve").onclick=async()=>{const x=await db.rpc("resolve_dispute",{p_dispute_id:ds.id,p_resolution:el("resolution").value.trim(),p_close_deal:true});if(x.error)return alert(x.error.message);await loadRemote();render()}}else ac.innerHTML='<div class="money">الصفقة قيد مراجعة الإدارة بسبب نزاع.</div>';
+}
 function productCards(){return products.map((p,i)=>`<article class="card prod"><div class="pic">${p.icon}</div><div class="prodbody"><b>${p.name}</b><div class="muted">${p.supplier} · ${p.qty}</div><div class="price">${p.price} ر.س</div><button class="btn" data-product="${i}">طلب عرض</button></div></article>`).join("")}
 function bindProducts(){document.querySelectorAll("[data-product]").forEach(b=>b.onclick=async()=>{const p=products[Number(b.dataset.product)];showModal(p.name,`<div class="money"><b>${p.price} ر.س</b><p class="muted">الكمية المتاحة: ${p.qty}</p></div><div class="field"><label>الكمية المطلوبة</label><input id="buyQty" class="input" type="number" value="1"></div><div class="field"><label>الوجهة</label><input id="buyDest" class="input" value="جدة"></div><button id="startChat" class="btn" style="width:100%">إرسال طلب شراء</button>`);el("startChat").onclick=async()=>{const {error}=await db.from("purchase_requests").insert({merchant_id:state.user.id,product_name:p.name,quantity:Number(el("buyQty").value),destination:el("buyDest").value,origin_country:p.origin_country,production_date:p.production_date,image_url:p.image_url});if(error)return alert(error.message);el("modal").classList.remove("show");await loadRemote();nav("requests")}})}
 function home(){
@@ -90,7 +158,7 @@ showModal("تقديم عرض",'<div class="field"><label>سعر الوحدة</la
 el("submitOffer").onclick=async()=>{const price=Number(el("offerPrice").value),qty=Number(el("offerQty").value),ship=Number(el("offerShip").value||0);if(price<=0||qty<=0)return alert("أدخل السعر والكمية");const x=await db.from("offers").insert({request_id:id,supplier_id:state.user.id,unit_price:price,quantity:qty,shipping_cost:ship,notes:el("offerNotes").value.trim()});if(x.error)return alert(x.error.message);el("modal").classList.remove("show");await loadRemote();render()};
 });
 document.querySelectorAll("[data-accept-offer]").forEach(b=>b.onclick=async()=>{const x=await db.rpc("accept_offer",{p_offer_id:b.dataset.acceptOffer});if(x.error)return alert(x.error.message);state.dealId=x.data;await loadRemote();nav("deals")});
-}function deals(){return deal()+`<div class="section card"><h3>سجل الإجراءات</h3><p class="muted">تم رفع مستند التحميل · تم اعتماد العرض · تم تحديث حالة الصفقة</p></div>`}
+}function deals(){return deal()+`<div class="section card"><h3>سجل الإجراءات</h3><div id="eventsList"><span class="muted">جاري التحميل...</span></div></div>`}
 function chat(){
 const rooms=[["supplier","شركة الخليج","تفاوض الصفقة #125"],["driver","أحمد — السائق","النقل"],["admin","إدارة وسيط","حماية الصفقة"]];
 const room=rooms.find(x=>x[0]===state.chat)||rooms[0];
@@ -124,6 +192,7 @@ async function showIncomingCall(call){const p=await db.from("profiles").select("
 document.getElementById("rejectVoice").onclick=async()=>{await db.from("voice_calls").update({status:"rejected"}).eq("id",call.id);document.getElementById("modal").classList.remove("show")};
 document.getElementById("acceptVoice").onclick=async()=>{document.getElementById("modal").classList.remove("show");const ch=db.channel("voice-"+call.id);ch.on("broadcast",{event:"signal"},async msg=>{const x=msg.payload;if(x?.kind==="offer"){await db.removeChannel(ch);acceptVoiceCall(call,x.offer)}}).subscribe(async status=>{if(status==="SUBSCRIBED"){ch.send({type:"broadcast",event:"signal",payload:{callId:call.id,from:state.user.id,kind:"accept"}})}})};
 }
+async function loadDealEvents(){const d=currentDeal();if(!d||!el("eventsList"))return;const q=await db.from("deal_events").select("*").eq("deal_id",d.id).order("created_at",{ascending:false}).limit(20);if(q.error)return;el("eventsList").innerHTML=(q.data||[]).map(x=>'<div style="padding:9px 0;border-bottom:1px solid var(--line)"><b>'+esc(x.event_type)+'</b><div class="muted">'+new Date(x.created_at).toLocaleString('ar-SA')+'</div></div>').join('')||'<span class="muted">لا توجد أحداث بعد.</span>'}
 function verification(){
 if(state.role!=="admin")return "<div class=\"card\"><h2>غير مصرح</h2></div>";
 return '<div class="head"><div><h2>مركز التحقق</h2><div class="muted">مراجعة حسابات التاجر والمورد والسائق والمستندات قبل تفعيل التعامل.</div></div><span class="tag">إدارة وسيط</span></div><div id="verifyList" class="card"><div class="muted">جاري تحميل طلبات التحقق...</div></div>';
@@ -171,7 +240,7 @@ if(state.page==="market")main.innerHTML=market();
 if(state.page==="requests")main.innerHTML=requests();
 if(state.page==="deals")main.innerHTML=deals();
 if(state.page==="chat")main.innerHTML=chat();
-bindDeal();bindProducts();bindChat();watchIncomingVoiceCalls();if(state.page==="verification")loadVerification();if(state.page==="requests")bindRequests();
+bindDeal();bindProducts();bindChat();watchIncomingVoiceCalls();if(state.page==="verification")loadVerification();if(state.page==="requests")bindRequests();if(state.page==="deals")loadDealEvents();
 if(el("marketBtn"))el("marketBtn").onclick=()=>nav("market");
 }
 login();
