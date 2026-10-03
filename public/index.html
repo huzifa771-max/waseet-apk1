@@ -95,7 +95,42 @@ function chat(){
 const rooms=[["supplier","شركة الخليج","تفاوض الصفقة #125"],["driver","أحمد — السائق","النقل"],["admin","إدارة وسيط","حماية الصفقة"]];
 const room=rooms.find(x=>x[0]===state.chat)||rooms[0];
 return `<div class="chat"><div class="rooms">${rooms.map(r=>`<div class="room ${state.chat===r[0]?"active":""}" data-room="${r[0]}"><b>${r[1]}</b><div class="muted">${r[2]}</div></div>`).join("")}</div><div class="chatbox"><div class="chathead"><div><b>${room[1]}</b><div class="muted">المحادثة محفوظة</div></div><button id="call" class="call">☎</button></div><div class="messages">${state.messages.length?state.messages.map(m=>`<div class="bubble ${m.me?"me":"them"}">${m.text}</div>`).join(""):"<div class='muted'>لا توجد رسائل بعد. ابدأ التفاوض من هنا.</div>"}</div><div class="compose"><textarea id="message" rows="2" placeholder="اكتب رسالة..."></textarea><button id="send" class="btn">إرسال</button></div></div></div>`}
-async function bindChat(){document.querySelectorAll("[data-room]").forEach(b=>b.onclick=()=>{state.chat=b.dataset.room;render()});if(state.dealId){const q=await db.from("messages").select("*").eq("deal_id",state.dealId).order("created_at",{ascending:true});if(!q.error)state.messages=(q.data||[]).map(m=>({text:m.body,me:m.sender_id===state.user?.id}));if(state.sub)await db.removeChannel(state.sub);state.sub=db.channel("waseet-chat-"+state.dealId).on("postgres_changes",{event:"INSERT",schema:"public",table:"messages",filter:"deal_id=eq."+state.dealId},payload=>{const m=payload.new;if(m.sender_id!==state.user?.id){state.messages.push({text:m.body,me:false});if(state.page==="chat")render()}}).subscribe()}if(el("send"))el("send").onclick=async()=>{const x=el("message").value.trim();if(!x)return;if(!state.dealId)return alert("لا توجد صفقة مرتبطة بهذه المحادثة حتى الآن.");const {error}=await db.from("messages").insert({deal_id:state.dealId,sender_id:state.user.id,body:x});if(error)return alert(error.message);el("message").value="";await bindChat()};if(el("call"))el("call").onclick=()=>alert("الاتصال الصوتي الحقيقي يحتاج مزود مكالمات خارجي؛ زر الاتصال جاهز للربط.")}
+async function bindChat(){document.querySelectorAll("[data-room]").forEach(b=>b.onclick=()=>{state.chat=b.dataset.room;render()});if(state.dealId){const q=await db.from("messages").select("*").eq("deal_id",state.dealId).order("created_at",{ascending:true});if(!q.error)state.messages=(q.data||[]).map(m=>({text:m.body,me:m.sender_id===state.user?.id}));if(state.sub)await db.removeChannel(state.sub);state.sub=db.channel("waseet-chat-"+state.dealId).on("postgres_changes",{event:"INSERT",schema:"public",table:"messages",filter:"deal_id=eq."+state.dealId},payload=>{const m=payload.new;if(m.sender_id!==state.user?.id){state.messages.push({text:m.body,me:false});if(state.page==="chat")render()}}).subscribe()}if(el("send"))el("send").onclick=async()=>{const x=el("message").value.trim();if(!x)return;if(!state.dealId)return alert("لا توجد صفقة مرتبطة بهذه المحادثة حتى الآن.");const {error}=await db.from("messages").insert({deal_id:state.dealId,sender_id:state.user.id,body:x});if(error)return alert(error.message);el("message").value="";await bindChat()};if(el("call"))el("call").onclick=()=>startVoiceCall()}
+let voice={pc:null,stream:null,callId:null,channel:null,pendingOffer:null};
+async function startVoiceCall(){
+if(!state.dealId)return alert("لا توجد صفقة مرتبطة بالمحادثة.");
+if(!navigator.mediaDevices?.getUserMedia)return alert("الميكروفون غير مدعوم في هذا الجهاز.");
+const r=await db.rpc("start_voice_call",{p_deal_id:state.dealId});if(r.error)return alert(r.error.message);
+const callId=r.data;voice.callId=callId;voice.channel=db.channel("voice-"+callId);
+voice.channel.on("broadcast",{event:"signal"},async msg=>{const p=msg.payload;if(!p||p.callId!==callId||p.from===state.user.id)return;if(p.kind==="answer"&&voice.pc)await voice.pc.setRemoteDescription(p.answer);if(p.kind==="ice"&&voice.pc)try{await voice.pc.addIceCandidate(p.candidate)}catch(e){}if(p.kind==="end")endVoice(false)}).subscribe(async status=>{
+if(status!=="SUBSCRIBED")return;
+voice.pc=new RTCPeerConnection({iceServers:[{urls:"stun:stun.l.google.com:19302"}]});
+voice.stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});voice.stream.getTracks().forEach(t=>voice.pc.addTrack(t,voice.stream));
+voice.pc.ontrack=e=>{let a=document.getElementById("remoteAudio");if(!a){a=document.createElement("audio");a.id="remoteAudio";a.autoplay=true;a.playsInline=true;document.body.appendChild(a)}a.srcObject=e.streams[0]};
+voice.pc.onicecandidate=e=>{if(e.candidate)voice.channel.send({type:"broadcast",event:"signal",payload:{callId:callId,from:state.user.id,kind:"ice",candidate:e.candidate}})};
+const offer=await voice.pc.createOffer();await voice.pc.setLocalDescription(offer);voice.pendingOffer=offer;
+voiceUi("اتصال صوتي","جاري الاتصال بالطرف الآخر...",true);voice.channel.send({type:"broadcast",event:"signal",payload:{callId:callId,from:state.user.id,kind:"offer",offer:offer}});
+});
+}
+function voiceUi(title,status,connected){showModal(title,'<div style="text-align:center"><div style="font-size:44px">☎</div><p id="voiceStatus">'+status+'</p><button id="endVoice" class="btn light">إنهاء المكالمة</button></div>');document.getElementById("endVoice").onclick=()=>endVoice(true)}
+async function acceptVoiceCall(call,offer){
+voice.callId=call.id;voice.channel=db.channel("voice-"+call.id);
+voice.channel.on("broadcast",{event:"signal"},async msg=>{const p=msg.payload;if(!p||p.from===state.user.id)return;if(p.kind==="ice"&&voice.pc)try{await voice.pc.addIceCandidate(p.candidate)}catch(e){}if(p.kind==="end")endVoice(false)}).subscribe(async status=>{
+if(status!=="SUBSCRIBED")return;
+await db.from("voice_calls").update({status:"accepted"}).eq("id",call.id);
+voice.pc=new RTCPeerConnection({iceServers:[{urls:"stun:stun.l.google.com:19302"}]});
+voice.pc.ontrack=e=>{let a=document.getElementById("remoteAudio");if(!a){a=document.createElement("audio");a.id="remoteAudio";a.autoplay=true;a.playsInline=true;document.body.appendChild(a)}a.srcObject=e.streams[0]};
+voice.pc.onicecandidate=e=>{if(e.candidate)voice.channel.send({type:"broadcast",event:"signal",payload:{callId:call.id,from:state.user.id,kind:"ice",candidate:e.candidate}})};
+await voice.pc.setRemoteDescription(offer);voice.stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});voice.stream.getTracks().forEach(t=>voice.pc.addTrack(t,voice.stream));
+const answer=await voice.pc.createAnswer();await voice.pc.setLocalDescription(answer);voiceUi("اتصال صوتي","متصل صوتياً",true);voice.channel.send({type:"broadcast",event:"signal",payload:{callId:call.id,from:state.user.id,kind:"answer",answer:answer}});
+});
+}
+async function endVoice(local){if(local&&voice.callId){await db.from("voice_calls").update({status:"ended",ended_at:new Date().toISOString()}).eq("id",voice.callId);if(voice.channel)voice.channel.send({type:"broadcast",event:"signal",payload:{callId:voice.callId,from:state.user.id,kind:"end"}})}if(voice.stream)voice.stream.getTracks().forEach(t=>t.stop());if(voice.pc)voice.pc.close();if(voice.channel)await db.removeChannel(voice.channel);voice={pc:null,stream:null,callId:null,channel:null,pendingOffer:null};if(document.getElementById("modal"))document.getElementById("modal").classList.remove("show")}
+async function watchIncomingVoiceCalls(){if(!state.user)return;const q=await db.from("voice_calls").select("*").eq("callee_id",state.user.id).eq("status","ringing").order("created_at",{ascending:false}).limit(1);if(q.data?.[0])showIncomingCall(q.data[0]);if(state.voiceWatch)await db.removeChannel(state.voiceWatch);state.voiceWatch=db.channel("voice-incoming-"+state.user.id).on("postgres_changes",{event:"INSERT",schema:"public",table:"voice_calls",filter:"callee_id=eq."+state.user.id},payload=>{if(payload.new?.status==="ringing")showIncomingCall(payload.new)}).subscribe()}
+async function showIncomingCall(call){const p=await db.from("profiles").select("full_name,business_name").eq("id",call.caller_id).maybeSingle();showModal("مكالمة واردة",'<div style="text-align:center"><div style="font-size:44px">☎</div><p>اتصال صوتي من '+esc(p.data?.business_name||p.data?.full_name||"الطرف الآخر")+'</p><div style="display:flex;gap:8px;justify-content:center"><button id="acceptVoice" class="btn">قبول</button><button id="rejectVoice" class="btn light">رفض</button></div></div>');
+document.getElementById("rejectVoice").onclick=async()=>{await db.from("voice_calls").update({status:"rejected"}).eq("id",call.id);document.getElementById("modal").classList.remove("show")};
+document.getElementById("acceptVoice").onclick=async()=>{document.getElementById("modal").classList.remove("show");const ch=db.channel("voice-"+call.id);ch.on("broadcast",{event:"signal"},async msg=>{const x=msg.payload;if(x?.kind==="offer"){await db.removeChannel(ch);acceptVoiceCall(call,x.offer)}}).subscribe()};
+}
 function verification(){
 if(state.role!=="admin")return "<div class=\"card\"><h2>غير مصرح</h2></div>";
 return '<div class="head"><div><h2>مركز التحقق</h2><div class="muted">مراجعة حسابات التاجر والمورد والسائق والمستندات قبل تفعيل التعامل.</div></div><span class="tag">إدارة وسيط</span></div><div id="verifyList" class="card"><div class="muted">جاري تحميل طلبات التحقق...</div></div>';
@@ -143,7 +178,7 @@ if(state.page==="market")main.innerHTML=market();
 if(state.page==="requests")main.innerHTML=requests();
 if(state.page==="deals")main.innerHTML=deals();
 if(state.page==="chat")main.innerHTML=chat();
-bindDeal();bindProducts();bindChat();if(state.page==="verification")loadVerification();if(state.page==="requests")bindRequests();
+bindDeal();bindProducts();bindChat();watchIncomingVoiceCalls();if(state.page==="verification")loadVerification();if(state.page==="requests")bindRequests();
 if(el("marketBtn"))el("marketBtn").onclick=()=>nav("market");
 }
 login();
