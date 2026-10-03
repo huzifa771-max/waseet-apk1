@@ -68,7 +68,8 @@ async function bindDeal(){
 const d=currentDeal(); if(!d)return;
 const box=el("transactionAction"); const panel=el("transactionPanel"); if(!box||!panel)return;
 let html='';
-if(d.stage==='negotiation') html='<button id="goPayment" class="btn" style="width:100%">الانتقال إلى الدفع</button>';
+if(state.role==='admin'&&d.stage==='payment') html='<span class="tag">مراجعة دفعة التاجر</span>';
+else if(d.stage==='negotiation') html='<button id="goPayment" class="btn" style="width:100%">الانتقال إلى الدفع</button>';
 else if(d.stage==='payment') html='<button id="payBtn" class="btn" style="width:100%">إرسال إثبات التحويل</button>';
 else if(d.stage==='loading') html='<button id="shipmentBtn" class="btn" style="width:100%">بيانات التحميل والسائق</button>';
 else if(d.stage==='transport') html='<button id="transportBtn" class="btn" style="width:100%">تحديث النقل / التسليم</button>';
@@ -81,6 +82,7 @@ panel.innerHTML='<div class="card"><div class="head"><h3>إجراءات الصف
 const ac=el("actionContent");
 const q=await db.from("payments").select("*").eq("deal_id",d.id).order("created_at",{ascending:false}).limit(3);
 const pay=q.data?.[0];
+if(state.role==='admin'&&d.stage==='payment'){await renderAdminPayment(d,ac);return}
 if(d.stage==='payment'&&pay) ac.innerHTML='<div class="money">آخر دفعة: '+Number(pay.amount||0).toLocaleString()+' ر.س · <b>'+esc(pay.status)+'</b>'+(pay.rejection_reason?'<div class="muted">سبب الرفض: '+esc(pay.rejection_reason)+'</div>':'')+'</div>';
 if(d.stage==='loading') await renderShipmentAction(d,ac);
 if(d.stage==='transport') await renderTransportAction(d,ac);
@@ -102,8 +104,11 @@ el("submitPayment").onclick=async()=>{const file=el("payFile").files[0];if(!file
 async function renderShipmentAction(d,ac){
 const sh=(await db.from("shipments").select("*").eq("deal_id",d.id).maybeSingle()).data;
 let drivers=[];if(state.role==='admin'||state.role==='merchant'||state.role==='supplier')drivers=(await db.from("profiles").select("id,full_name,phone").eq("role","driver").eq("verification_status","approved")).data||[];
-ac.innerHTML=(sh?'<div class="money">السائق: '+esc(sh.driver_phone||"-")+' · المركبة: '+esc(sh.vehicle_plate||"-")+' · الحالة: '+esc(sh.status)+'</div>':'<div class="muted">لم يتم تعيين سائق بعد.</div>')+(drivers.length?'<div class="field"><label>تعيين السائق</label><select id="driverSel" class="input">'+drivers.map(x=>'<option value="'+x.id+'">'+esc(x.full_name||x.phone)+'</option>').join('')+'</select></div><button id="assignDriver" class="btn">تعيين السائق</button>':'');
+ac.innerHTML=(sh?'<div class="money">السائق: '+esc(sh.driver_phone||"-")+' · المركبة: '+esc(sh.vehicle_plate||"-")+' · الحالة: '+esc(sh.status)+'</div>':'<div class="muted">لم يتم تعيين سائق بعد.</div>')+
+(drivers.length?'<div class="field"><label>تعيين السائق</label><select id="driverSel" class="input">'+drivers.map(x=>'<option value="'+x.id+'">'+esc(x.full_name||x.phone)+'</option>').join('')+'</select></div><button id="assignDriver" class="btn">تعيين السائق</button>':'')+
+(state.role==='supplier'||state.role==='admin'?'<hr><div class="field"><label>رقم اللوحة</label><input id="loadPlate" class="input" value="'+esc(sh?.vehicle_plate||"")+'"></div><div class="field"><label>هاتف السائق</label><input id="loadPhone" class="input" value="'+esc(sh?.driver_phone||"")+'"></div><div class="field"><label>موعد الوصول المتوقع</label><input id="loadEta" class="input" type="datetime-local"></div><div class="field"><label>صورة/ملف إثبات التحميل</label><input id="loadingProof" class="input" type="file" accept=".pdf,image/*"></div><button id="saveLoading" class="btn">حفظ التحميل والانتقال للنقل</button>':'');
 if(el("assignDriver"))el("assignDriver").onclick=async()=>{const x=await db.rpc("assign_driver",{p_deal_id:d.id,p_driver_id:el("driverSel").value});if(x.error)return alert(x.error.message);await renderShipmentAction(d,ac)};
+if(el("saveLoading"))el("saveLoading").onclick=async()=>{let proof=sh?.loading_proof_url||null;const f=el("loadingProof").files[0];if(f){const path=state.user.id+"/"+d.id+"-loading-"+Date.now()+"-"+f.name.replace(/[^a-zA-Z0-9._-]/g,"_");const u=await db.storage.from("payment-proofs").upload(path,f,{upsert:false});if(u.error)return alert(u.error.message);proof=path}const x=await db.from("shipments").upsert({deal_id:d.id,vehicle_plate:el("loadPlate").value.trim(),driver_phone:el("loadPhone").value.trim(),expected_arrival:el("loadEta").value?new Date(el("loadEta").value).toISOString():null,loading_proof_url:proof,status:"loaded"},{onConflict:"deal_id"});if(x.error)return alert(x.error.message);const z=await db.rpc("advance_deal_stage",{p_deal_id:d.id,p_target_stage:"transport"});if(z.error)return alert(z.error.message);await loadRemote();render()};
 }
 async function renderTransportAction(d,ac){
 const sh=(await db.from("shipments").select("*").eq("deal_id",d.id).maybeSingle()).data;
@@ -111,6 +116,7 @@ if(state.role==='supplier'||state.role==='admin')ac.innerHTML='<div class="field
 else ac.innerHTML='<div class="money">السائق: '+esc(sh?.driver_phone||"-")+' · اللوحة: '+esc(sh?.vehicle_plate||"-")+' · الحالة: '+esc(sh?.status||"-")+'</div>';
 if(el("saveShipment"))el("saveShipment").onclick=async()=>{let proof=sh?.loading_proof_url||null;const f=el("loadProof").files[0];if(f){const path=state.user.id+"/"+d.id+"-loading-"+Date.now()+"-"+f.name.replace(/[^a-zA-Z0-9._-]/g,"_");const u=await db.storage.from("documents").upload(path,f,{upsert:false});if(u.error)return alert(u.error.message);proof=path}const x=await db.from("shipments").upsert({deal_id:d.id,vehicle_plate:el("plate").value.trim(),driver_phone:el("driverPhone").value.trim(),expected_arrival:el("eta").value?new Date(el("eta").value).toISOString():null,loading_proof_url:proof,status:"in_transit"},{onConflict:"deal_id"});if(x.error)return alert(x.error.message);const z=await db.rpc("advance_deal_stage",{p_deal_id:d.id,p_target_stage:"transport"});if(z.error)return alert(z.error.message);await loadRemote();render()};
 }
+async function renderAdminPayment(d,ac){const q=await db.from("payments").select("*").eq("deal_id",d.id).order("created_at",{ascending:false}).limit(1);const p=q.data?.[0];if(!p){ac.innerHTML='<div class="muted">لا يوجد إثبات دفع بعد.</div>';return}ac.innerHTML='<div class="money"><b>دفعة '+Number(p.amount||0).toLocaleString()+' ر.س</b><div>الحالة: '+esc(p.status)+' · المرجع: '+esc(p.reference||"-")+'</div></div>'+(p.status==='pending'?'<div style="display:flex;gap:8px;margin-top:10px"><button id="verifyPay" class="btn">اعتماد التحويل</button><button id="rejectPay" class="btn light">رفض التحويل</button></div>':'');if(el("verifyPay"))el("verifyPay").onclick=async()=>{const x=await db.rpc("verify_payment",{p_payment_id:p.id,p_approved:true});if(x.error)return alert(x.error.message);await loadRemote();render()};if(el("rejectPay"))el("rejectPay").onclick=async()=>{const reason=prompt("سبب رفض التحويل")||"لم يتم اعتماد إثبات التحويل";const x=await db.rpc("verify_payment",{p_payment_id:p.id,p_approved:false,p_reason:reason});if(x.error)return alert(x.error.message);await loadRemote();render()}}
 async function renderInspectionAction(d,ac){
 const existing=(await db.from("inspections").select("*").eq("deal_id",d.id).maybeSingle()).data;
 ac.innerHTML='<div class="field"><label>نتيجة الفحص</label><select id="inspectionResult" class="input"><option value="passed">مطابق</option><option value="failed">غير مطابق</option><option value="partial">مطابقة جزئية</option></select></div><div class="field"><label>ملاحظات</label><textarea id="inspectionNotes" class="input" rows="3">'+esc(existing?.notes||"")+'</textarea></div><button id="saveInspection" class="btn">حفظ نتيجة الفحص</button><button id="openDispute" class="btn light" style="margin-right:6px">فتح نزاع</button>';
